@@ -6,748 +6,794 @@
 <title>Git Worktree &amp; Sessions — aegas_mvp_v3</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --sidebar-bg: #090C14;
-  --bg: #0E1119;
-  --bg-input: #14161E;
-  --surface: #181B23;
-  --surface-raised: #1F222C;
-  --text: #E4E6EB;
-  --text-secondary: #8B8F9A;
-  --muted: #5F636E;
-  --border: #2A2D38;
-  --border-light: #22252F;
-  --accent: #2EC4A0;
-  --accent-hover: #3DD4B0;
-  --accent-light: rgba(46, 196, 160, 0.12);
-  --accent-icon-bg: rgba(46, 196, 160, 0.10);
-  --accent-icon-border: rgba(46, 196, 160, 0.25);
-  --accent-glow: rgba(46, 196, 160, 0.06);
-  --purple: #7C5CFC;
-  --purple-light: rgba(124, 92, 252, 0.12);
-  --orange: #F59E0B;
-  --orange-light: rgba(245, 158, 11, 0.12);
-  --pink: #EC4899;
-  --pink-light: rgba(236, 72, 153, 0.12);
-  --cyan: #38BDF8;
-  --cyan-light: rgba(56, 189, 248, 0.12);
-  --status-error: #EF4444;
-  --red-soft: rgba(239, 68, 68, 0.10);
+:root{
+  --bg:#0E1119;--bg2:#14161E;--sf:#181B23;--sfr:#1F222C;
+  --tx:#E4E6EB;--tx2:#8B8F9A;--mt:#5F636E;
+  --bd:#2A2D38;--bdl:#22252F;
+  --ac:#2EC4A0;--acl:rgba(46,196,160,.12);--acib:rgba(46,196,160,.25);
+  --pp:#7C5CFC;--ppl:rgba(124,92,252,.12);
+  --or:#F59E0B;--orl:rgba(245,158,11,.12);
+  --cy:#38BDF8;--cyl:rgba(56,189,248,.12);
+  --pk:#EC4899;--pkl:rgba(236,72,153,.12);
+  --rd:#EF4444;--rdl:rgba(239,68,68,.1);
 }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter','Helvetica Neue',-apple-system,sans-serif;background:var(--bg);color:var(--tx);-webkit-font-smoothing:antialiased;min-height:100vh;overflow-x:hidden}
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* BG */
+.bgl{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.bgg{position:absolute;inset:-100%;background-image:linear-gradient(rgba(46,196,160,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(46,196,160,.04) 1px,transparent 1px);background-size:28px 28px;animation:gd 30s linear infinite}
+.bgm{position:absolute;inset:-100%;background-image:linear-gradient(rgba(46,196,160,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(46,196,160,.07) 1px,transparent 1px);background-size:140px 140px;animation:gd 45s linear infinite}
+@keyframes gd{to{transform:translate(28px,28px)}}
+.bgw{position:absolute;width:900px;height:900px;top:-200px;left:50%;transform:translateX(-50%);background:radial-gradient(ellipse,rgba(46,196,160,.07),rgba(46,196,160,.02) 40%,transparent 70%);animation:gp 8s ease-in-out infinite}
+.bgw2{position:absolute;width:700px;height:700px;bottom:-300px;right:-200px;background:radial-gradient(ellipse,rgba(124,92,252,.04),transparent 60%);animation:gp 12s ease-in-out infinite reverse}
+@keyframes gp{0%,100%{opacity:.6;transform:translateX(-50%) scale(1)}50%{opacity:1;transform:translateX(-50%) scale(1.08)}}
 
-body {
-  font-family: 'Inter', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+.pg{max-width:1180px;margin:0 auto;padding:40px 24px;position:relative}
 
-/* ── Dense background grid + teal glow ── */
-.bg-layer {
-  position: fixed; inset: 0; z-index: -1;
-  pointer-events: none; overflow: hidden;
-}
-.bg-grid {
-  position: absolute; inset: -100%;
-  background-image:
-    linear-gradient(rgba(46, 196, 160, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(46, 196, 160, 0.04) 1px, transparent 1px);
-  background-size: 28px 28px;
-  animation: gridDrift 30s linear infinite;
-}
-.bg-grid-major {
-  position: absolute; inset: -100%;
-  background-image:
-    linear-gradient(rgba(46, 196, 160, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(46, 196, 160, 0.07) 1px, transparent 1px);
-  background-size: 140px 140px;
-  animation: gridDrift 45s linear infinite;
-}
-@keyframes gridDrift { 0%{transform:translate(0,0)}100%{transform:translate(28px,28px)} }
-.bg-glow {
-  position: absolute;
-  width: 900px; height: 900px;
-  top: -200px; left: 50%;
-  transform: translateX(-50%);
-  background: radial-gradient(ellipse, rgba(46,196,160,0.07) 0%, rgba(46,196,160,0.02) 40%, transparent 70%);
-  animation: glowPulse 8s ease-in-out infinite;
-}
-.bg-glow-bottom {
-  position: absolute;
-  width: 700px; height: 700px;
-  bottom: -300px; right: -200px;
-  background: radial-gradient(ellipse, rgba(124,92,252,0.04) 0%, transparent 60%);
-  animation: glowPulse 12s ease-in-out infinite reverse;
-}
-@keyframes glowPulse {
-  0%, 100% { opacity: 0.6; transform: translateX(-50%) scale(1); }
-  50% { opacity: 1; transform: translateX(-50%) scale(1.08); }
-}
+/* Header */
+.hdr{display:flex;align-items:center;gap:16px;margin-bottom:40px;flex-wrap:wrap}
+.hi{width:48px;height:48px;background:rgba(46,196,160,.1);border:1px solid var(--acib);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative}
+.hi::after{content:'';position:absolute;inset:-4px;border-radius:12px;background:radial-gradient(circle,rgba(46,196,160,.12),transparent 70%);z-index:-1}
+.hi svg{color:var(--ac)}
+.hdr h1{font-size:22px;font-weight:800;letter-spacing:.06em}
+.hdr p{font-size:13px;color:var(--mt);margin-top:2px}
 
-.page { max-width: 1180px; margin: 0 auto; padding: 40px 24px; position: relative; }
+/* Stats */
+.stats{display:flex;gap:24px;padding:14px 20px;background:var(--sf);border-radius:8px;border-left:2px solid var(--acib);margin-bottom:36px;flex-wrap:wrap}
+.st{display:flex;align-items:baseline;gap:6px}
+.st b{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.st span{font-size:11px;color:var(--mt)}
 
-/* ── Header ── */
-.header { display: flex; align-items: center; gap: 16px; margin-bottom: 40px; }
-.header-icon {
-  width: 48px; height: 48px;
-  background: var(--accent-icon-bg);
-  border: 1px solid var(--accent-icon-border);
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  position: relative;
-}
-.header-icon::after {
-  content: '';
-  position: absolute; inset: -4px;
-  border-radius: 12px;
-  background: radial-gradient(circle, rgba(46,196,160,0.12), transparent 70%);
-  z-index: -1;
-}
-.header-icon svg { color: var(--accent); }
-.header h1 { font-size: 24px; font-weight: 800; letter-spacing: 0.06em; }
-.header p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+/* Collapsible */
+.sec{margin-bottom:28px}
+.sb{display:flex;align-items:center;gap:10px;width:100%;background:none;border:none;color:var(--tx);font:inherit;font-size:14px;font-weight:600;cursor:pointer;padding:10px 0;text-align:left;transition:color 150ms}
+.sb .d{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.sb .ch{margin-left:auto;width:16px;height:16px;color:var(--mt);transition:transform 200ms;flex-shrink:0}
+.sb[aria-expanded="false"] .ch{transform:rotate(-90deg)}
+@media(hover:hover){.sb:hover{color:var(--ac)}.sb:hover .ch{color:var(--ac)}}
+.sc{overflow:hidden;transition:max-height 300ms,opacity 200ms}
+.sc[data-o="0"]{max-height:0;opacity:0;pointer-events:none}
+.sc[data-o="1"]{max-height:12000px;opacity:1}
+.si{padding-top:10px}
 
-/* ── Stat strip (inline, no cards) ── */
-.stat-strip {
-  display: flex;
-  gap: 32px;
-  padding: 16px 24px;
-  background: var(--surface);
-  border-radius: 8px;
-  border-left: 2px solid var(--accent-icon-border);
-  margin-bottom: 40px;
-  flex-wrap: wrap;
-}
-.stat-item { display: flex; align-items: baseline; gap: 8px; }
-.stat-num { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
-.stat-num.accent { color: var(--accent); }
-.stat-num.orange { color: var(--orange); }
-.stat-num.purple { color: var(--purple); }
-.stat-num.error { color: var(--status-error); }
-.stat-desc { font-size: 12px; color: var(--muted); }
+/* SVG scroll */
+.fw{overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:12px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+.fw::-webkit-scrollbar{height:5px}
+.fw::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+.fw svg{display:block;overflow:visible}
+.fw svg text{font-family:'Inter',sans-serif}
 
-/* ── Collapsible ── */
-.collapsible { margin-bottom: 32px; }
-.collapse-btn {
-  display: flex; align-items: center; gap: 10px;
-  width: 100%; background: none; border: none;
-  color: var(--text); font: inherit;
-  font-size: 15px; font-weight: 600;
-  cursor: pointer; padding: 10px 0; text-align: left;
-  transition: color 150ms ease;
-}
-.collapse-btn .dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-.collapse-btn .chev {
-  margin-left: auto; width: 18px; height: 18px;
-  color: var(--muted); transition: transform 200ms ease; flex-shrink: 0;
-}
-.collapse-btn[aria-expanded="false"] .chev { transform: rotate(-90deg); }
-.collapse-btn[aria-expanded="true"] .chev { transform: rotate(0deg); }
-@media (hover: hover) {
-  .collapse-btn:hover { color: var(--accent); }
-  .collapse-btn:hover .chev { color: var(--accent); }
-}
-.collapse-body {
-  overflow: hidden;
-  transition: max-height 300ms ease, opacity 200ms ease;
-}
-.collapse-body[data-open="false"] { max-height: 0; opacity: 0; pointer-events: none; }
-.collapse-body[data-open="true"] { max-height: 5000px; opacity: 1; }
-.collapse-inner { padding-top: 12px; }
+@keyframes mv{0%{offset-distance:0%;opacity:0}10%{opacity:1}90%{opacity:1}100%{offset-distance:100%;opacity:0}}
+.pt{offset-rotate:0deg;animation:mv 2.4s ease-in-out infinite}
+.pt.s{animation-duration:3.8s}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-/* ── SVG Flow Diagram ── */
-.flow-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin: 0 -24px;
-  padding: 0 24px 12px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-.flow-wrap::-webkit-scrollbar { height: 6px; }
-.flow-wrap::-webkit-scrollbar-track { background: transparent; }
-.flow-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-.flow-svg { overflow: visible; display: block; }
-.flow-svg text { font-family: 'Inter', sans-serif; }
-/* Lock each SVG to its intrinsic pixel width so nodes never shrink */
-.flow-svg.flow-branch  { width: 960px; min-width: 960px; height: 200px; }
-.flow-svg.flow-session { width: 960px; min-width: 960px; height: 260px; }
-.flow-svg.flow-rebase  { width: 960px; min-width: 960px; height: 130px; }
+/* Pills */
+.p{display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;white-space:nowrap}
+.pa{color:var(--ac);background:var(--acl)}.po{color:var(--or);background:var(--orl)}
+.pr{color:var(--rd);background:var(--rdl)}.pc{color:var(--cy);background:var(--cyl)}
+.pm{color:var(--mt);background:rgba(95,99,110,.15)}.pp{color:var(--pp);background:var(--ppl)}
+.ppk{color:var(--pk);background:var(--pkl)}
 
-/* Animated particles on SVG paths */
-@keyframes moveAlongPath {
-  0% { offset-distance: 0%; opacity: 0; }
-  8% { opacity: 1; }
-  92% { opacity: 1; }
-  100% { offset-distance: 100%; opacity: 0; }
-}
-@keyframes moveAlongPathReverse {
-  0% { offset-distance: 100%; opacity: 0; }
-  8% { opacity: 1; }
-  92% { opacity: 1; }
-  100% { offset-distance: 0%; opacity: 0; }
-}
+/* Rows */
+.row{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--bdl);border-left:3px solid transparent;border-radius:6px;padding:10px 14px;margin-bottom:4px;font-size:13px;flex-wrap:wrap;transition:background-color 150ms,border-color 150ms}
+@media(hover:hover){.row:hover{background:var(--sf);border-left-color:var(--ac)}}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;animation:pulse 2s ease-in-out infinite}
+.dg{background:var(--ac);box-shadow:0 0 8px var(--ac)}
+.dy{background:var(--or);box-shadow:0 0 8px var(--or)}
+.dr{background:var(--rd);box-shadow:0 0 8px var(--rd)}
+.mn{font-family:'SF Mono','Fira Code',monospace;font-size:11px;flex-shrink:0}
+.ds{color:var(--tx2);font-size:12px;flex:1;min-width:100px}
+.lb{font-weight:600;font-size:12px;flex-shrink:0}
 
-.svg-particle {
-  offset-rotate: 0deg;
-  animation: moveAlongPath 2.5s ease-in-out infinite;
-}
-.svg-particle.slow { animation-duration: 4s; }
-.svg-particle.reverse { animation-name: moveAlongPathReverse; animation-duration: 3s; }
+/* Timeline */
+.tl{position:relative;padding-left:24px}
+.tl::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--bd)}
+.ti{position:relative;margin-bottom:3px;padding:8px 12px;background:var(--bg2);border:1px solid var(--bdl);border-radius:6px;border-left:3px solid transparent;transition:background-color 150ms,border-color 150ms}
+@media(hover:hover){.ti:hover{background:var(--sf);border-left-color:var(--ac)}}
+.ti::before{content:'';position:absolute;left:-20px;top:13px;width:8px;height:8px;border-radius:50%;border:2px solid var(--bd);background:var(--bg)}
+.ti.feat::before{border-color:var(--ac);background:var(--ac);box-shadow:0 0 5px var(--ac)}
+.ti.fix::before{border-color:var(--or);background:var(--or);box-shadow:0 0 5px var(--or)}
+.ti.merge::before{border-color:var(--pp);background:var(--pp);box-shadow:0 0 5px var(--pp)}
+.ti.redesign::before{border-color:var(--cy);background:var(--cy);box-shadow:0 0 5px var(--cy)}
+.ti.test::before{border-color:var(--pk);background:var(--pk);box-shadow:0 0 5px var(--pk)}
+.ti.docs::before{border-color:var(--mt)}
+.th{font-family:'SF Mono','Fira Code',monospace;font-size:10px;color:var(--cy);margin-right:6px}
+.tm{font-size:11px;color:var(--tx2)}
+.td{font-size:10px;color:var(--mt);margin-left:auto;flex-shrink:0;padding-left:6px}
+.tr{display:flex;align-items:center;flex-wrap:wrap;gap:4px}
 
-/* Arrow pulse on hover */
-@keyframes arrowGlow {
-  0%, 100% { filter: drop-shadow(0 0 2px rgba(46,196,160,0.3)); }
-  50% { filter: drop-shadow(0 0 6px rgba(46,196,160,0.6)); }
-}
+/* Summary */
+.sum{background:var(--sf);border-radius:8px;border-left:2px solid var(--or);padding:18px 20px}
+.sum h3{font-size:13px;font-weight:600;color:var(--or);margin-bottom:10px}
+.sum li{font-size:12px;color:var(--tx2);padding:4px 0;display:flex;align-items:flex-start;gap:8px;list-style:none}
+.sum li::before{content:'';width:4px;height:4px;border-radius:1px;background:var(--or);margin-top:6px;flex-shrink:0}
+.sum code{color:var(--tx2);font-size:11px}
 
-/* ── Pills ── */
-.pill { display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;gap:4px;white-space:nowrap; }
-.pill-success { color:var(--accent);background:var(--accent-light); }
-.pill-warning { color:var(--orange);background:var(--orange-light); }
-.pill-error { color:var(--status-error);background:var(--red-soft); }
-.pill-info { color:var(--cyan);background:var(--cyan-light); }
-.pill-muted { color:var(--muted);background:rgba(95,99,110,0.15); }
-.pill-purple { color:var(--purple);background:var(--purple-light); }
+/* Category cards */
+.cg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.cc{background:var(--bg2);border:1px solid var(--bdl);border-radius:6px;padding:12px 14px;border-left:3px solid transparent}
+.cc h4{font-size:12px;font-weight:600;margin-bottom:4px}
+.cc .n{font-size:20px;font-weight:700;line-height:1;margin-bottom:3px}
+.cc .s{font-size:10px;color:var(--mt);line-height:1.3}
 
-/* ── Session rows (compact, wrap on small screens) ── */
-.session-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-light);
-  border-left: 3px solid transparent;
-  border-radius: 6px;
-  padding: 12px 16px;
-  margin-bottom: 5px;
-  font-size: 13px;
-  flex-wrap: wrap;
-  transition: background-color 150ms ease, border-color 150ms ease;
-}
-@media (hover: hover) {
-  .session-row:hover { background: var(--surface); border-left-color: var(--accent); }
-}
-.active-dot {
-  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-  animation: pulse 2s ease-in-out infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
-.active-dot.green { background:var(--accent);box-shadow:0 0 8px var(--accent); }
-.active-dot.yellow { background:var(--orange);box-shadow:0 0 8px var(--orange); }
-.active-dot.red { background:var(--status-error);box-shadow:0 0 8px var(--status-error); }
-.mono { font-family:'SF Mono','Fira Code',monospace;font-size:12px;flex-shrink:0; }
-.session-branch { font-weight: 600; font-size: 12px; flex-shrink: 0; }
-.session-desc { color: var(--text-secondary); font-size: 12px; flex: 1; min-width: 120px; }
+/* Legend */
+.legend{display:flex;gap:16px;flex-wrap:wrap;padding:10px 14px;background:var(--sf);border-radius:6px;margin-bottom:14px;border-left:2px solid var(--acib)}
+.lg{display:flex;align-items:center;gap:6px;font-size:10px;color:var(--mt)}
+.lg .ln{width:24px;height:0;border-top:2px solid}
+.lg .ln.dash{border-top-style:dashed}
+.lg .ln.dot{border-top-style:dotted}
 
-/* ── Worktree list (compact rows, wrap on small screens) ── */
-.wt-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-light);
-  border-left: 3px solid transparent;
-  border-radius: 6px;
-  padding: 12px 16px;
-  margin-bottom: 5px;
-  flex-wrap: wrap;
-  transition: background-color 150ms ease, border-color 150ms ease;
-}
-@media (hover: hover) {
-  .wt-row:hover { background: var(--surface); border-left-color: var(--accent); }
-}
-.wt-name { font-size: 13px; font-weight: 600; word-break: break-all; flex-shrink: 0; }
-.wt-desc { font-size: 12px; color: var(--text-secondary); flex: 1; min-width: 140px; }
-.wt-pills { display: flex; gap: 5px; flex-wrap: wrap; margin-left: auto; }
+.ts{font-size:10px;color:var(--mt);text-align:right;margin-top:28px}
 
-/* ── Summary ── */
-.summary {
-  background: var(--surface);
-  border-radius: 8px;
-  border-left: 2px solid var(--orange);
-  padding: 20px 24px;
+/* ── Responsive ── */
+@media(max-width:900px){.cg{grid-template-columns:repeat(2,1fr)!important}}
+@media(max-width:600px){
+  .pg{padding:20px 12px}
+  .hdr h1{font-size:18px}
+  .stats{gap:14px;padding:12px 14px}
+  .st b{font-size:22px}
+  .cg{grid-template-columns:1fr 1fr}
+  .sum{padding:14px}
+  .ti{padding:7px 10px}
+  .row{padding:9px 12px;gap:8px}
 }
-.summary h3 { font-size: 14px; font-weight: 600; color: var(--orange); margin-bottom: 12px; }
-.summary li {
-  font-size: 13px; color: var(--text-secondary);
-  padding: 5px 0; display: flex; align-items: flex-start; gap: 8px;
-  list-style: none;
-}
-.summary li::before {
-  content:''; width:4px; height:4px; border-radius:1px;
-  background:var(--orange); margin-top:7px; flex-shrink:0;
-}
-.summary code { color: var(--text-secondary); font-size: 12px; }
-
-.timestamp { font-size: 11px; color: var(--muted); text-align: right; margin-top: 32px; }
-
-/* ── Responsive — sizes stay intact, layout wraps ── */
-@media (max-width: 640px) {
-  .page { padding: 20px 14px; }
-  .stat-strip { gap: 20px; padding: 14px 16px; }
-  .summary { padding: 16px; }
-  .flow-wrap { margin: 0 -14px; padding: 0 14px 12px; }
+@media(max-width:400px){
+  .cg{grid-template-columns:1fr}
+  .stats{gap:10px}
 }
 </style>
 </head>
 <body>
+<div class="bgl"><div class="bgg"></div><div class="bgm"></div><div class="bgw"></div><div class="bgw2"></div></div>
+<div class="pg">
 
-<!-- Background layers -->
-<div class="bg-layer">
-  <div class="bg-grid"></div>
-  <div class="bg-grid-major"></div>
-  <div class="bg-glow"></div>
-  <div class="bg-glow-bottom"></div>
+<div class="hdr">
+  <div class="hi"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M6 9v12"/></svg></div>
+  <div><h1>aegas_mvp_v3</h1><p>Full Commit &amp; Session Flow &mdash; worktrees to remote</p></div>
 </div>
 
-<div class="page">
+<!-- ════════ KEY INSIGHTS ════════ -->
+<div class="stats" style="gap:20px">
+  <div class="st"><b style="color:var(--ac)">254</b><span>total commits</span></div>
+  <div class="st"><b style="color:var(--pp)">16</b><span>branches</span></div>
+  <div class="st"><b style="color:var(--cy)">402</b><span>files changed</span></div>
+  <div class="st"><b style="color:var(--ac)">42.5k</b><span>lines added</span></div>
+  <div class="st"><b style="color:var(--or)">7.3k</b><span>lines removed</span></div>
+  <div class="st"><b style="color:var(--rd)">7</b><span>days</span></div>
+</div>
 
-  <!-- Header -->
-  <div class="header">
-    <div class="header-icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M6 9v12"/>
+<div class="sec">
+  <button class="sb" aria-expanded="true" onclick="t(this)">
+    <span class="d" style="background:var(--ac)"></span>Key Insights &amp; Analytics
+    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="sc" data-o="1"><div class="si">
+    <div class="cg" style="grid-template-columns:repeat(4,1fr);margin-bottom:12px">
+      <div class="cc" style="border-left-color:var(--ac)"><div class="n" style="color:var(--ac)">90</div><h4 style="color:var(--ac)">Apr 8 — peak</h4><div class="s">Highest commit day: rubrics build, exam wizard, visual-enhancements</div></div>
+      <div class="cc" style="border-left-color:var(--or)"><div class="n" style="color:var(--or)">80</div><h4 style="color:var(--or)">Apr 9 — redesign</h4><div class="s">Dark Sequence rollout, grading pipeline, ClawTeam fd2-fd6 merges</div></div>
+      <div class="cc" style="border-left-color:var(--cy)"><div class="n" style="color:var(--cy)">27</div><h4 style="color:var(--cy)">Apr 10 — audit</h4><div class="s">E2E tests, CLA bug fixes, accessibility, exports, API alignment</div></div>
+      <div class="cc" style="border-left-color:var(--pp)"><div class="n" style="color:var(--pp)">57</div><h4 style="color:var(--pp)">Earlier</h4><div class="s">Apr 4-7: initial setup, course module, API integration, PRs</div></div>
+    </div>
+
+    <div class="cg" style="margin-bottom:12px">
+      <div class="cc" style="border-left-color:var(--ac)"><div class="n" style="color:var(--ac)">37</div><h4 style="color:var(--ac)">Features</h4><div class="s">Grading pipeline, upload, rubrics, admin, help center, rosters, credits</div></div>
+      <div class="cc" style="border-left-color:var(--or)"><div class="n" style="color:var(--or)">26</div><h4 style="color:var(--or)">Bug Fixes</h4><div class="s">API alignment, GradingStep, ResultsStep, exports, S3 URLs, dedup</div></div>
+      <div class="cc" style="border-left-color:var(--cy)"><div class="n" style="color:var(--cy)">23+6</div><h4 style="color:var(--cy)">Redesign</h4><div class="s">Dark Sequence: all pages, sidebar, mobile drawer, modals</div></div>
+      <div class="cc" style="border-left-color:var(--mt)"><div class="n" style="color:var(--mt)">29</div><h4 style="color:var(--mt)">Docs</h4><div class="s">API reference, pipeline spec, E2E screenshots, CLAUDE.md</div></div>
+      <div class="cc" style="border-left-color:var(--pk)"><div class="n" style="color:var(--pk)">3</div><h4 style="color:var(--pk)">Tests</h4><div class="s">E2E grading (24 scenarios), rubric step, billing</div></div>
+      <div class="cc" style="border-left-color:var(--pp)"><div class="n" style="color:var(--pp)">12</div><h4 style="color:var(--pp)">Merges</h4><div class="s">fd2-fd6, cla-52, visual-enhancements, billing, online-exams</div></div>
+    </div>
+
+    <!-- Top touched areas -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+      <span style="font-size:11px;color:var(--mt);padding:3px 0">Top areas:</span>
+      <span class="p pc">courses 11</span>
+      <span class="p pa">exams 10</span>
+      <span class="p pa">dashboard 10</span>
+      <span class="p pp">admin 5</span>
+      <span class="p po">rubrics 4</span>
+      <span class="p ppk">billing 4</span>
+      <span class="p pm">appeals 3</span>
+      <span class="p pm">settings 2</span>
+      <span class="p pm">rosters 2</span>
+    </div>
+
+    <!-- Biggest files -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--mt);padding:3px 0">Hot files:</span>
+      <span class="p po" style="font-family:'SF Mono',monospace;font-size:10px">UploadStep.tsx +1833</span>
+      <span class="p po" style="font-family:'SF Mono',monospace;font-size:10px">GradingStep.tsx +1320</span>
+      <span class="p po" style="font-family:'SF Mono',monospace;font-size:10px">OverviewTab.tsx +1059</span>
+      <span class="p pm" style="font-family:'SF Mono',monospace;font-size:10px">149 PNGs, 95 TSX, 78 TS</span>
+    </div>
+
+  </div></div>
+</div>
+
+<div class="stats" style="gap:20px">
+  <div class="st"><b style="color:var(--ac)">137</b><span>on paperclip-dev</span></div>
+  <div class="st"><b style="color:var(--pp)">12</b><span>merges</span></div>
+  <div class="st"><b style="color:var(--or)">17</b><span>unpushed</span></div>
+  <div class="st"><b style="color:var(--cy)">9</b><span>worktrees</span></div>
+  <div class="st"><b style="color:var(--rd)">1</b><span>broken</span></div>
+</div>
+
+<!-- ════════ MASTER FLOW ════════ -->
+<div class="sec">
+  <button class="sb" aria-expanded="true" onclick="t(this)">
+    <span class="d" style="background:var(--ac)"></span>Full Branch &amp; Push Flow
+    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="sc" data-o="1"><div class="si">
+
+    <!-- Legend -->
+    <div class="legend">
+      <div class="lg"><span class="ln" style="border-color:var(--ac)"></span>Synced push</div>
+      <div class="lg"><span class="ln dash" style="border-color:var(--or)"></span>Needs push</div>
+      <div class="lg"><span class="ln" style="border-color:var(--pp)"></span>Merged branch</div>
+      <div class="lg"><span class="ln dash" style="border-color:var(--pp)"></span>Unmerged worktree</div>
+      <div class="lg"><span class="ln dot" style="border-color:var(--rd)"></span>Broken ref</div>
+      <div class="lg"><span class="ln" style="border-color:var(--cy)"></span>Feature branch</div>
+      <div class="lg"><span class="ln dash" style="border-color:var(--mt)"></span>Stale / behind</div>
+    </div>
+
+    <div class="fw">
+      <!--
+        Layout: 3 horizontal swim-lanes stacked vertically
+        Row 1 (y=10-80):   REMOTE   — 4 boxes left-to-right
+        Row 2 (y=110-200):  LOCAL    — 3 boxes left-to-right
+        Row 3 (y=240-340):  WORKTREES — 2 sub-rows, no overlapping lines
+        Row 4 (y=370-420):  MERGED (dimmed)
+
+        All vertical connections use straight drops. Horizontal uses right-angle routing.
+      -->
+      <svg style="width:1100px;min-width:1100px;height:460px" viewBox="0 0 1100 460">
+        <defs>
+          <marker id="ma" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L1.5,3Z" fill="#2EC4A0" opacity=".8"/></marker>
+          <marker id="mo" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L1.5,3Z" fill="#F59E0B" opacity=".8"/></marker>
+          <marker id="mp" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L1.5,3Z" fill="#7C5CFC" opacity=".7"/></marker>
+          <marker id="mc" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L1.5,3Z" fill="#38BDF8" opacity=".7"/></marker>
+          <marker id="mr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L1.5,3Z" fill="#EF4444" opacity=".6"/></marker>
+          <marker id="mm" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L1.5,3Z" fill="#5F636E" opacity=".4"/></marker>
+          <filter id="ga" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="gb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+
+        <!-- ═══ ROW 1: REMOTE ═══ -->
+        <rect x="15" y="8" width="1070" height="72" rx="8" fill="rgba(46,196,160,.025)" stroke="#22252F" stroke-dasharray="6,4"/>
+        <text x="30" y="26" fill="#5F636E" font-size="9" font-weight="600" letter-spacing=".08em">GITHUB REMOTE</text>
+
+        <rect x="40" y="34" width="140" height="36" rx="6" fill="#14161E" stroke="#22252F"/>
+        <text x="110" y="48" text-anchor="middle" fill="#5F636E" font-size="9" font-weight="500">origin/main</text>
+        <text x="110" y="62" text-anchor="middle" fill="#2EC4A0" font-size="12" font-weight="700">fba7144</text>
+
+        <rect x="260" y="34" width="180" height="36" rx="6" fill="#14161E" stroke="#2EC4A0" stroke-opacity=".3"/>
+        <text x="350" y="48" text-anchor="middle" fill="#5F636E" font-size="9" font-weight="500">origin/paperclip-dev</text>
+        <text x="350" y="62" text-anchor="middle" fill="#2EC4A0" font-size="12" font-weight="700">5a3b0f5</text>
+
+        <rect x="520" y="34" width="140" height="36" rx="6" fill="#14161E" stroke="#F59E0B" stroke-opacity=".15"/>
+        <text x="590" y="48" text-anchor="middle" fill="#5F636E" font-size="9" font-weight="500">origin/dev</text>
+        <text x="590" y="62" text-anchor="middle" fill="#F59E0B" font-size="12" font-weight="700">ad117ac</text>
+
+        <rect x="740" y="34" width="190" height="36" rx="6" fill="#14161E" stroke="#5F636E" stroke-opacity=".12"/>
+        <text x="835" y="48" text-anchor="middle" fill="#5F636E" font-size="9" font-weight="500">origin/visual-enhancements</text>
+        <text x="835" y="62" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="600">cb9c449</text>
+
+        <!-- ═══ ROW 2: LOCAL BRANCHES ═══ -->
+        <rect x="15" y="100" width="1070" height="110" rx="8" fill="rgba(46,196,160,.015)"/>
+        <text x="30" y="118" fill="#5F636E" font-size="9" font-weight="600" letter-spacing=".08em">LOCAL BRANCHES</text>
+
+        <!-- main -->
+        <rect x="40" y="128" width="140" height="50" rx="6" fill="#14161E" stroke="#22252F"/>
+        <text x="110" y="148" text-anchor="middle" fill="#5F636E" font-size="9">main</text>
+        <text x="110" y="164" text-anchor="middle" fill="#2EC4A0" font-size="13" font-weight="700">fba7144</text>
+        <!-- synced badge -->
+        <rect x="72" y="180" width="76" height="14" rx="3" fill="rgba(46,196,160,.08)"/>
+        <text x="110" y="190" text-anchor="middle" fill="#2EC4A0" font-size="8" font-weight="500">synced</text>
+
+        <!-- main → origin/main : solid green vertical -->
+        <line x1="110" y1="128" x2="110" y2="74" stroke="#2EC4A0" stroke-width="2" marker-end="url(#ma)"/>
+        <circle r="4" fill="#2EC4A0" filter="url(#gb)" class="pt" style="offset-path:path('M110,128 L110,74')"><animate attributeName="r" values="3;5;3" dur="2.4s" repeatCount="indefinite"/></circle>
+
+        <!-- paperclip-dev -->
+        <rect x="260" y="124" width="180" height="58" rx="6" fill="#14161E" stroke="#2EC4A0" stroke-opacity=".35"/>
+        <text x="350" y="144" text-anchor="middle" fill="#5F636E" font-size="9">paperclip-dev (HEAD)</text>
+        <text x="350" y="162" text-anchor="middle" fill="#2EC4A0" font-size="14" font-weight="700">a5f1cce</text>
+        <!-- pulsing glow -->
+        <rect x="257" y="121" width="186" height="64" rx="8" fill="none" stroke="#2EC4A0" stroke-opacity=".06"><animate attributeName="stroke-opacity" values=".03;.18;.03" dur="3s" repeatCount="indefinite"/></rect>
+        <!-- needs push badge -->
+        <rect x="295" y="184" width="110" height="14" rx="3" fill="rgba(245,158,11,.1)"/>
+        <text x="350" y="194" text-anchor="middle" fill="#F59E0B" font-size="8" font-weight="600">17 ahead — needs push</text>
+
+        <!-- paperclip-dev → origin/paperclip-dev : dashed orange vertical -->
+        <line x1="350" y1="124" x2="350" y2="74" stroke="#F59E0B" stroke-width="2" stroke-dasharray="6,4" marker-end="url(#mo)"/>
+        <circle r="4" fill="#F59E0B" filter="url(#gb)" class="pt" style="offset-path:path('M350,124 L350,74');animation-delay:.3s"><animate attributeName="r" values="3;6;3" dur="2.4s" repeatCount="indefinite"/></circle>
+
+        <!-- main → paperclip-dev : solid green horizontal -->
+        <line x1="180" y1="153" x2="256" y2="153" stroke="#2EC4A0" stroke-width="2" marker-end="url(#ma)"/>
+        <circle r="3" fill="#2EC4A0" filter="url(#gb)" class="pt s" style="offset-path:path('M180,153 L256,153');animation-delay:.6s"/>
+
+        <!-- dev (local) -->
+        <rect x="520" y="128" width="140" height="50" rx="6" fill="#14161E" stroke="#F59E0B" stroke-opacity=".12"/>
+        <text x="590" y="148" text-anchor="middle" fill="#5F636E" font-size="9">dev</text>
+        <text x="590" y="164" text-anchor="middle" fill="#F59E0B" font-size="13" font-weight="700">8a07e28</text>
+        <rect x="542" y="180" width="96" height="14" rx="3" fill="rgba(239,68,68,.06)"/>
+        <text x="590" y="190" text-anchor="middle" fill="#EF4444" font-size="8" font-weight="500">22 behind remote</text>
+
+        <!-- ═══ ROW 3: WORKTREES ═══ -->
+        <rect x="15" y="226" width="1070" height="130" rx="8" fill="rgba(124,92,252,.015)"/>
+        <text x="30" y="244" fill="#5F636E" font-size="9" font-weight="600" letter-spacing=".08em">WORKTREES (LOCAL ONLY)</text>
+
+        <!-- Fork point marker on paperclip-dev vertical spine -->
+        <line x1="350" y1="200" x2="350" y2="252" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4,4"/>
+        <circle cx="350" cy="252" r="5" fill="none" stroke="#F59E0B" stroke-width="2"/>
+        <circle cx="350" cy="252" r="2" fill="#F59E0B"/>
+        <text x="350" y="265" text-anchor="middle" fill="#F59E0B" font-size="8" font-weight="600">fork fba7144</text>
+
+        <!-- Horizontal bus line from fork point -->
+        <line x1="40" y1="280" x2="1060" y2="280" stroke="#22252F" stroke-width="1"/>
+
+        <!-- Vertical drop from fork to bus -->
+        <line x1="350" y1="268" x2="350" y2="280" stroke="#F59E0B" stroke-width="1.5" stroke-dasharray="3,3"/>
+
+        <!-- Worktree boxes on the bus — evenly spaced, vertical drops from bus -->
+        <!-- 1: appeals (purple dashed) -->
+        <line x1="60" y1="280" x2="60" y2="296" stroke="#7C5CFC" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#mp)"/>
+        <rect x="20" y="300" width="80" height="44" rx="5" fill="#14161E" stroke="#7C5CFC" stroke-opacity=".2"/>
+        <text x="60" y="316" text-anchor="middle" fill="#7C5CFC" font-size="9" font-weight="600">appeals</text>
+        <text x="60" y="330" text-anchor="middle" fill="#5F636E" font-size="8">d01d078</text>
+
+        <!-- 2: exam+help -->
+        <line x1="160" y1="280" x2="160" y2="296" stroke="#7C5CFC" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#mp)"/>
+        <rect x="116" y="300" width="88" height="44" rx="5" fill="#14161E" stroke="#7C5CFC" stroke-opacity=".2"/>
+        <text x="160" y="316" text-anchor="middle" fill="#7C5CFC" font-size="9" font-weight="600">exam+help</text>
+        <text x="160" y="330" text-anchor="middle" fill="#5F636E" font-size="8">e20860c</text>
+
+        <!-- 3: billing -->
+        <line x1="260" y1="280" x2="260" y2="296" stroke="#7C5CFC" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#mp)"/>
+        <rect x="222" y="300" width="76" height="44" rx="5" fill="#14161E" stroke="#7C5CFC" stroke-opacity=".2"/>
+        <text x="260" y="316" text-anchor="middle" fill="#7C5CFC" font-size="9" font-weight="600">billing</text>
+        <text x="260" y="330" text-anchor="middle" fill="#5F636E" font-size="8">2baa87b</text>
+
+        <!-- 4: settings -->
+        <line x1="370" y1="280" x2="370" y2="296" stroke="#7C5CFC" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#mp)"/>
+        <rect x="330" y="300" width="80" height="44" rx="5" fill="#14161E" stroke="#7C5CFC" stroke-opacity=".2"/>
+        <text x="370" y="316" text-anchor="middle" fill="#7C5CFC" font-size="9" font-weight="600">settings</text>
+        <text x="370" y="330" text-anchor="middle" fill="#5F636E" font-size="8">4240ad4</text>
+
+        <!-- 5: API keys -->
+        <line x1="475" y1="280" x2="475" y2="296" stroke="#7C5CFC" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#mp)"/>
+        <rect x="435" y="300" width="80" height="44" rx="5" fill="#14161E" stroke="#7C5CFC" stroke-opacity=".2"/>
+        <text x="475" y="316" text-anchor="middle" fill="#7C5CFC" font-size="9" font-weight="600">API keys</text>
+        <text x="475" y="330" text-anchor="middle" fill="#5F636E" font-size="8">90fcdb1</text>
+
+        <!-- 6: help-center (cyan solid) -->
+        <line x1="580" y1="280" x2="580" y2="296" stroke="#38BDF8" stroke-width="1.5" marker-end="url(#mc)"/>
+        <rect x="535" y="300" width="90" height="44" rx="5" fill="#14161E" stroke="#38BDF8" stroke-opacity=".25"/>
+        <text x="580" y="316" text-anchor="middle" fill="#38BDF8" font-size="9" font-weight="600">help-center</text>
+        <text x="580" y="330" text-anchor="middle" fill="#5F636E" font-size="8">72238be 2c</text>
+
+        <!-- 7: status-badges (green solid) -->
+        <line x1="690" y1="280" x2="690" y2="296" stroke="#2EC4A0" stroke-width="1.5" marker-end="url(#ma)"/>
+        <rect x="640" y="300" width="100" height="44" rx="5" fill="#14161E" stroke="#2EC4A0" stroke-opacity=".25"/>
+        <text x="690" y="316" text-anchor="middle" fill="#2EC4A0" font-size="9" font-weight="600">status-badges</text>
+        <text x="690" y="330" text-anchor="middle" fill="#5F636E" font-size="8">2bfea9b 1c</text>
+
+        <!-- 8: student-perf (green solid, thicker — at HEAD) -->
+        <line x1="810" y1="280" x2="810" y2="296" stroke="#2EC4A0" stroke-width="2" marker-end="url(#ma)"/>
+        <rect x="760" y="300" width="100" height="44" rx="5" fill="#14161E" stroke="#2EC4A0" stroke-opacity=".4"/>
+        <text x="810" y="316" text-anchor="middle" fill="#2EC4A0" font-size="9" font-weight="600">student-perf</text>
+        <text x="810" y="330" text-anchor="middle" fill="#5F636E" font-size="8">65b8545 1c</text>
+        <rect x="780" y="346" width="60" height="12" rx="3" fill="rgba(46,196,160,.1)"/>
+        <text x="810" y="355" text-anchor="middle" fill="#2EC4A0" font-size="7" font-weight="500">at HEAD</text>
+
+        <!-- 9: cla-94 (red dotted — broken) -->
+        <line x1="940" y1="280" x2="940" y2="296" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="2,3" marker-end="url(#mr)"/>
+        <rect x="900" y="300" width="80" height="44" rx="5" fill="rgba(239,68,68,.03)" stroke="#EF4444" stroke-opacity=".25"/>
+        <text x="940" y="316" text-anchor="middle" fill="#EF4444" font-size="9" font-weight="600">cla-94</text>
+        <text x="940" y="330" text-anchor="middle" fill="#5F636E" font-size="8">BROKEN</text>
+        <!-- X mark -->
+        <line x1="890" y1="314" x2="898" y2="324" stroke="#EF4444" stroke-width="2" opacity=".5"/>
+        <line x1="898" y1="314" x2="890" y2="324" stroke="#EF4444" stroke-width="2" opacity=".5"/>
+
+        <!-- Animated particles along bus -->
+        <circle r="3" fill="#7C5CFC" filter="url(#gb)" class="pt s" style="offset-path:path('M350,280 L60,280');animation-delay:0s;opacity:.6"/>
+        <circle r="3" fill="#2EC4A0" filter="url(#ga)" class="pt s" style="offset-path:path('M350,280 L810,280');animation-delay:.5s"/>
+        <circle r="3" fill="#38BDF8" filter="url(#gb)" class="pt s" style="offset-path:path('M350,280 L580,280');animation-delay:1.2s"/>
+
+        <!-- ═══ ROW 4: MERGED (dimmed) ═══ -->
+        <text x="30" y="388" fill="#5F636E" font-size="9" font-weight="600" letter-spacing=".08em">ALREADY MERGED INTO PAPERCLIP-DEV</text>
+
+        <rect x="40" y="396" width="98" height="24" rx="4" fill="rgba(124,92,252,.04)" stroke="#7C5CFC" stroke-opacity=".1"/>
+        <text x="89" y="412" text-anchor="middle" fill="#7C5CFC" font-size="9" opacity=".6">fd2 dashboard</text>
+
+        <rect x="148" y="396" width="110" height="24" rx="4" fill="rgba(124,92,252,.04)" stroke="#7C5CFC" stroke-opacity=".1"/>
+        <text x="203" y="412" text-anchor="middle" fill="#7C5CFC" font-size="9" opacity=".6">fd3 courses</text>
+
+        <rect x="268" y="396" width="98" height="24" rx="4" fill="rgba(124,92,252,.04)" stroke="#7C5CFC" stroke-opacity=".1"/>
+        <text x="317" y="412" text-anchor="middle" fill="#7C5CFC" font-size="9" opacity=".6">fd4 exams</text>
+
+        <rect x="376" y="396" width="90" height="24" rx="4" fill="rgba(124,92,252,.04)" stroke="#7C5CFC" stroke-opacity=".1"/>
+        <text x="421" y="412" text-anchor="middle" fill="#7C5CFC" font-size="9" opacity=".6">fd5 rubrics</text>
+
+        <rect x="476" y="396" width="90" height="24" rx="4" fill="rgba(124,92,252,.04)" stroke="#7C5CFC" stroke-opacity=".1"/>
+        <text x="521" y="412" text-anchor="middle" fill="#7C5CFC" font-size="9" opacity=".6">fd6 results</text>
+
+        <rect x="576" y="396" width="114" height="24" rx="4" fill="rgba(124,92,252,.04)" stroke="#7C5CFC" stroke-opacity=".1"/>
+        <text x="633" y="412" text-anchor="middle" fill="#7C5CFC" font-size="9" opacity=".6">cla-52 infra</text>
+
+        <rect x="700" y="396" width="130" height="24" rx="4" fill="rgba(124,92,252,.04)" stroke="#7C5CFC" stroke-opacity=".1"/>
+        <text x="765" y="412" text-anchor="middle" fill="#7C5CFC" font-size="9" opacity=".6">visual-enhance</text>
+
+        <rect x="840" y="396" width="90" height="24" rx="4" fill="rgba(124,92,252,.04)" stroke="#7C5CFC" stroke-opacity=".1"/>
+        <text x="885" y="412" text-anchor="middle" fill="#7C5CFC" font-size="9" opacity=".6">billing feat-5</text>
+
+        <rect x="940" y="396" width="90" height="24" rx="4" fill="rgba(124,92,252,.04)" stroke="#7C5CFC" stroke-opacity=".1"/>
+        <text x="985" y="412" text-anchor="middle" fill="#7C5CFC" font-size="9" opacity=".6">online-exam</text>
+
+        <!-- Merged arrows (dim purple, pointing up to paperclip-dev) -->
+        <path d="M500,396 L500,380 L350,380 L350,200" stroke="#7C5CFC" stroke-width="1" stroke-dasharray="3,4" opacity=".15" marker-end="url(#mp)"/>
       </svg>
     </div>
-    <div>
-      <h1>aegas_mvp_v3</h1>
-      <p>Git Worktree &amp; Session Analysis &mdash; paperclip-dev @ 9414f46</p>
-    </div>
-  </div>
 
-  <!-- Stat strip -->
-  <div class="stat-strip">
-    <div class="stat-item"><span class="stat-num accent">9</span><span class="stat-desc">worktrees</span></div>
-    <div class="stat-item"><span class="stat-num orange">8</span><span class="stat-desc">sessions (1 active)</span></div>
-    <div class="stat-item"><span class="stat-num purple">130</span><span class="stat-desc">commits behind</span></div>
-    <div class="stat-item"><span class="stat-num error">1</span><span class="stat-desc">broken ref</span></div>
-  </div>
-
-  <!-- ═══════════ FLOW: Branch Pipeline ═══════════ -->
-  <div class="collapsible">
-    <button class="collapse-btn" aria-expanded="true" onclick="toggle(this)">
-      <span class="dot" style="background:var(--accent)"></span>
-      Branch Dataflow
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <div class="collapse-body" data-open="true"><div class="collapse-inner">
-      <div class="flow-wrap">
-        <svg class="flow-svg flow-branch" viewBox="0 0 960 200">
-          <defs>
-            <!-- Arrow marker -->
-            <marker id="arr" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
-              <path d="M0,0 L10,4 L0,8 L2,4 Z" fill="#2EC4A0" opacity="0.7"/>
-            </marker>
-            <marker id="arr-orange" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
-              <path d="M0,0 L10,4 L0,8 L2,4 Z" fill="#F59E0B" opacity="0.7"/>
-            </marker>
-            <marker id="arr-muted" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
-              <path d="M0,0 L10,4 L0,8 L2,4 Z" fill="#5F636E" opacity="0.5"/>
-            </marker>
-            <!-- Glow filters -->
-            <filter id="glow-teal" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="4" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <filter id="glow-orange" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="blur"/>
-              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-
-          <!-- Edge paths -->
-          <path id="e1" d="M170,90 C220,90 230,90 280,90" stroke="#2A2D38" stroke-width="2" fill="none" marker-end="url(#arr)"/>
-          <path id="e2" d="M450,90 C510,90 510,90 560,90" stroke="#2A2D38" stroke-width="2" fill="none" marker-end="url(#arr)"/>
-          <path id="e3" d="M720,90 Q780,90 800,120 Q820,150 860,150" stroke="#2A2D38" stroke-width="2" fill="none" marker-end="url(#arr-muted)" stroke-dasharray="4,4"/>
-          <path id="e3b" d="M720,90 Q780,90 800,60 Q820,30 860,30" stroke="#2A2D38" stroke-width="2" fill="none" marker-end="url(#arr-orange)" stroke-dasharray="4,4"/>
-
-          <!-- Animated particles -->
-          <circle r="5" fill="#2EC4A0" filter="url(#glow-teal)" class="svg-particle" style="offset-path:path('M170,90 C220,90 230,90 280,90');animation-delay:0s">
-            <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/>
-          </circle>
-          <circle r="5" fill="#2EC4A0" filter="url(#glow-teal)" class="svg-particle" style="offset-path:path('M450,90 C510,90 510,90 560,90');animation-delay:0.6s">
-            <animate attributeName="r" values="4;6;4" dur="2.5s" repeatCount="indefinite"/>
-          </circle>
-          <circle r="4" fill="#F59E0B" filter="url(#glow-orange)" class="svg-particle slow" style="offset-path:path('M720,90 Q780,90 800,60 Q820,30 860,30');animation-delay:1s">
-            <animate attributeName="r" values="3;5;3" dur="4s" repeatCount="indefinite"/>
-          </circle>
-          <circle r="3" fill="#5F636E" class="svg-particle slow" style="offset-path:path('M720,90 Q780,90 800,120 Q820,150 860,150');animation-delay:2s;opacity:0.5"/>
-
-          <!-- Nodes -->
-          <!-- main -->
-          <rect x="20" y="60" width="150" height="60" rx="6" fill="#14161E" stroke="#22252F"/>
-          <text x="95" y="82" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="500">MAIN</text>
-          <text x="95" y="104" text-anchor="middle" fill="#2EC4A0" font-size="14" font-weight="700">origin/main</text>
-
-          <!-- paperclip-dev -->
-          <rect x="280" y="60" width="170" height="60" rx="6" fill="#14161E" stroke="#2EC4A0" stroke-opacity="0.3"/>
-          <text x="365" y="82" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="500">DEVELOPMENT</text>
-          <text x="365" y="104" text-anchor="middle" fill="#2EC4A0" font-size="14" font-weight="700">paperclip-dev</text>
-          <!-- Active glow ring -->
-          <rect x="277" y="57" width="176" height="66" rx="8" fill="none" stroke="#2EC4A0" stroke-opacity="0.1">
-            <animate attributeName="stroke-opacity" values="0.05;0.2;0.05" dur="3s" repeatCount="indefinite"/>
-          </rect>
-
-          <!-- fork point -->
-          <rect x="560" y="60" width="160" height="60" rx="6" fill="#14161E" stroke="#F59E0B" stroke-opacity="0.3"/>
-          <text x="640" y="82" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="500">FORK POINT</text>
-          <text x="640" y="104" text-anchor="middle" fill="#F59E0B" font-size="14" font-weight="700">fba7144</text>
-
-          <!-- worktrees (top branch) -->
-          <rect x="860" y="10" width="90" height="40" rx="6" fill="#14161E" stroke="#F59E0B" stroke-opacity="0.2"/>
-          <text x="905" y="28" text-anchor="middle" fill="#F59E0B" font-size="11" font-weight="600">7 behind</text>
-          <text x="905" y="42" text-anchor="middle" fill="#5F636E" font-size="10">need rebase</text>
-
-          <!-- worktrees (bottom branch) -->
-          <rect x="860" y="130" width="90" height="40" rx="6" fill="#14161E" stroke="#5F636E" stroke-opacity="0.2"/>
-          <text x="905" y="148" text-anchor="middle" fill="#2EC4A0" font-size="11" font-weight="600">1 current</text>
-          <text x="905" y="162" text-anchor="middle" fill="#5F636E" font-size="10">cla-93</text>
-
-          <!-- 130 commits label -->
-          <rect x="470" y="112" width="80" height="22" rx="4" fill="rgba(124,92,252,0.12)"/>
-          <text x="510" y="127" text-anchor="middle" fill="#7C5CFC" font-size="11" font-weight="600">+130 commits</text>
-        </svg>
-      </div>
-    </div></div>
-  </div>
-
-  <!-- ═══════════ FLOW: Session Mapping ═══════════ -->
-  <div class="collapsible">
-    <button class="collapse-btn" aria-expanded="true" onclick="toggle(this)">
-      <span class="dot" style="background:var(--orange)"></span>
-      Session &rarr; Worktree Mapping
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <div class="collapse-body" data-open="true"><div class="collapse-inner">
-      <div class="flow-wrap">
-        <svg class="flow-svg flow-session" viewBox="0 0 960 260">
-          <!-- Reuse defs from above are not inherited, redefine -->
-          <defs>
-            <marker id="a2" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
-              <path d="M0,0 L10,4 L0,8 L2,4 Z" fill="#2EC4A0" opacity="0.7"/>
-            </marker>
-            <marker id="a2r" markerWidth="10" markerHeight="8" refX="1" refY="4" orient="auto">
-              <path d="M10,0 L0,4 L10,8 L8,4 Z" fill="#EF4444" opacity="0.7"/>
-            </marker>
-            <marker id="a2m" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
-              <path d="M0,0 L10,4 L0,8 L2,4 Z" fill="#5F636E" opacity="0.4"/>
-            </marker>
-            <filter id="g2" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-            <filter id="g2r" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-
-          <!-- Active session flow -->
-          <path id="s1" d="M180,50 C240,50 260,50 310,50" stroke="#2A2D38" stroke-width="2" fill="none" marker-end="url(#a2)"/>
-          <circle r="5" fill="#2EC4A0" filter="url(#g2)" class="svg-particle" style="offset-path:path('M180,50 C240,50 260,50 310,50')">
-            <animate attributeName="r" values="4;7;4" dur="2.5s" repeatCount="indefinite"/>
-          </circle>
-
-          <!-- Sub-agent broken flow -->
-          <path d="M470,50 Q530,50 550,80 Q570,110 620,120" stroke="#2A2D38" stroke-width="2" fill="none" marker-end="url(#a2)"/>
-          <path d="M780,120 Q820,120 840,140 Q860,165 880,165" stroke="#EF4444" stroke-width="2" fill="none" marker-end="url(#a2r)" stroke-dasharray="6,4" opacity="0.6"/>
-          <circle r="4" fill="#2EC4A0" filter="url(#g2)" class="svg-particle" style="offset-path:path('M470,50 Q530,50 550,80 Q570,110 620,120');animation-delay:0.4s">
-            <animate attributeName="r" values="3;6;3" dur="2.5s" repeatCount="indefinite"/>
-          </circle>
-          <circle r="4" fill="#EF4444" filter="url(#g2r)" class="svg-particle reverse" style="offset-path:path('M780,120 Q820,120 840,140 Q860,165 880,165');animation-delay:1s">
-            <animate attributeName="r" values="3;5;3" dur="3s" repeatCount="indefinite"/>
-          </circle>
-
-          <!-- Stale sessions flow (dim) -->
-          <path d="M180,50 Q180,160 200,190 Q220,210 310,210" stroke="#2A2D38" stroke-width="1.5" fill="none" marker-end="url(#a2m)" stroke-dasharray="4,6" opacity="0.4"/>
-          <circle r="3" fill="#5F636E" class="svg-particle slow" style="offset-path:path('M180,50 Q180,160 200,190 Q220,210 310,210');animation-delay:2s;opacity:0.4"/>
-
-          <!-- Nodes -->
-          <!-- This session -->
-          <rect x="20" y="20" width="160" height="60" rx="6" fill="#14161E" stroke="#2EC4A0" stroke-opacity="0.3"/>
-          <text x="100" y="42" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="500">PID 30148</text>
-          <text x="100" y="62" text-anchor="middle" fill="#2EC4A0" font-size="14" font-weight="700">This Session</text>
-          <rect x="17" y="17" width="166" height="66" rx="8" fill="none" stroke="#2EC4A0" stroke-opacity="0.08">
-            <animate attributeName="stroke-opacity" values="0.04;0.18;0.04" dur="3s" repeatCount="indefinite"/>
-          </rect>
-
-          <!-- paperclip-dev -->
-          <rect x="310" y="20" width="160" height="60" rx="6" fill="#14161E" stroke="#22252F"/>
-          <text x="390" y="42" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="500">BRANCH</text>
-          <text x="390" y="62" text-anchor="middle" fill="#2EC4A0" font-size="14" font-weight="700">paperclip-dev</text>
-
-          <!-- Sub-agent -->
-          <rect x="620" y="90" width="160" height="60" rx="6" fill="#14161E" stroke="#7C5CFC" stroke-opacity="0.3"/>
-          <text x="700" y="112" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="500">SUB-AGENT PID 28328</text>
-          <text x="700" y="132" text-anchor="middle" fill="#7C5CFC" font-size="13" font-weight="600">Frontend Dev</text>
-
-          <!-- Broken worktree -->
-          <rect x="880" y="145" width="70" height="40" rx="6" fill="rgba(239,68,68,0.06)" stroke="#EF4444" stroke-opacity="0.3"/>
-          <text x="915" y="163" text-anchor="middle" fill="#EF4444" font-size="11" font-weight="600">cla-94</text>
-          <text x="915" y="177" text-anchor="middle" fill="#5F636E" font-size="9">DIR DELETED</text>
-          <!-- X mark -->
-          <line x1="870" y1="155" x2="878" y2="165" stroke="#EF4444" stroke-width="2" opacity="0.6"/>
-          <line x1="878" y1="155" x2="870" y2="165" stroke="#EF4444" stroke-width="2" opacity="0.6"/>
-
-          <!-- Stale cluster -->
-          <rect x="310" y="185" width="200" height="50" rx="6" fill="#14161E" stroke="#5F636E" stroke-opacity="0.15"/>
-          <text x="410" y="206" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="500">6 STALE CLAWTEAM SESSIONS</text>
-          <text x="410" y="222" text-anchor="middle" fill="#5F636E" font-size="10">PIDs 13947, 26008, 14325, 14886, 15448, 16086</text>
-
-          <!-- Status labels -->
-          <circle cx="194" cy="50" r="4" fill="#2EC4A0"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
-          <circle cx="304" cy="210" r="3" fill="#F59E0B"><animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/></circle>
-        </svg>
-      </div>
-    </div></div>
-  </div>
-
-  <!-- ═══════════ FLOW: Rebase Plan ═══════════ -->
-  <div class="collapsible">
-    <button class="collapse-btn" aria-expanded="true" onclick="toggle(this)">
-      <span class="dot" style="background:var(--purple)"></span>
-      Rebase Pipeline
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <div class="collapse-body" data-open="true"><div class="collapse-inner">
-      <div class="flow-wrap">
-        <svg class="flow-svg flow-rebase" viewBox="0 0 960 130">
-          <defs>
-            <marker id="a3" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto">
-              <path d="M0,0 L12,5 L0,10 L3,5 Z" fill="#2EC4A0" opacity="0.8"/>
-            </marker>
-            <marker id="a3p" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto">
-              <path d="M0,0 L12,5 L0,10 L3,5 Z" fill="#7C5CFC" opacity="0.8"/>
-            </marker>
-            <filter id="g3" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-
-          <!-- Long animated path -->
-          <path id="rebase-path" d="M160,65 L310,65" stroke="#2A2D38" stroke-width="2" fill="none" marker-end="url(#a3p)"/>
-          <path d="M480,65 L650,65" stroke="#2A2D38" stroke-width="2" fill="none" marker-end="url(#a3)"/>
-          <path d="M820,65 L920,65" stroke="#2EC4A0" stroke-width="2" fill="none" marker-end="url(#a3)" opacity="0.5"/>
-
-          <!-- Big animated particles -->
-          <circle r="6" fill="#7C5CFC" filter="url(#g3)" class="svg-particle" style="offset-path:path('M160,65 L310,65')">
-            <animate attributeName="r" values="5;8;5" dur="2.5s" repeatCount="indefinite"/>
-          </circle>
-          <circle r="6" fill="#2EC4A0" filter="url(#g3)" class="svg-particle" style="offset-path:path('M480,65 L650,65');animation-delay:0.8s">
-            <animate attributeName="r" values="5;8;5" dur="2.5s" repeatCount="indefinite"/>
-          </circle>
-          <circle r="5" fill="#2EC4A0" filter="url(#g3)" class="svg-particle" style="offset-path:path('M820,65 L920,65');animation-delay:1.5s">
-            <animate attributeName="r" values="4;7;4" dur="2.5s" repeatCount="indefinite"/>
-          </circle>
-
-          <!-- Nodes -->
-          <rect x="20" y="35" width="140" height="60" rx="6" fill="#14161E" stroke="#F59E0B" stroke-opacity="0.3"/>
-          <text x="90" y="57" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="500">FORK POINT</text>
-          <text x="90" y="77" text-anchor="middle" fill="#F59E0B" font-size="14" font-weight="700">fba7144</text>
-
-          <rect x="310" y="35" width="170" height="60" rx="6" fill="rgba(124,92,252,0.06)" stroke="#7C5CFC" stroke-opacity="0.3"/>
-          <text x="395" y="57" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="500">REPLAY +130</text>
-          <text x="395" y="77" text-anchor="middle" fill="#7C5CFC" font-size="16" font-weight="700">git rebase</text>
-
-          <rect x="650" y="35" width="170" height="60" rx="6" fill="#14161E" stroke="#2EC4A0" stroke-opacity="0.3"/>
-          <text x="735" y="57" text-anchor="middle" fill="#5F636E" font-size="11" font-weight="500">NEW BASE</text>
-          <text x="735" y="77" text-anchor="middle" fill="#2EC4A0" font-size="14" font-weight="700">9414f46</text>
-
-          <rect x="920" y="45" width="30" height="40" rx="6" fill="rgba(46,196,160,0.08)" stroke="#2EC4A0" stroke-opacity="0.2"/>
-          <text x="935" y="70" text-anchor="middle" fill="#2EC4A0" font-size="16" font-weight="700">&#10003;</text>
-
-          <!-- Progress bar underneath -->
-          <rect x="20" y="110" width="930" height="4" rx="2" fill="#14161E"/>
-          <rect x="20" y="110" width="930" height="4" rx="2" fill="#2EC4A0" opacity="0.15">
-            <animate attributeName="width" values="0;930;0" dur="6s" repeatCount="indefinite"/>
-          </rect>
-        </svg>
-      </div>
-    </div></div>
-  </div>
-
-  <!-- ═══════════ Sessions ═══════════ -->
-  <div class="collapsible">
-    <button class="collapse-btn" aria-expanded="true" onclick="toggle(this)">
-      <span class="dot" style="background:var(--orange)"></span>
-      Claude Sessions
-      <span class="pill pill-warning" style="margin-left:4px">8</span>
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <div class="collapse-body" data-open="true"><div class="collapse-inner">
-
-      <div class="session-row" style="border-left-color:var(--accent)">
-        <div class="active-dot green"></div>
-        <span class="mono" style="color:var(--cyan)">30148</span>
-        <span class="mono" style="color:var(--text-secondary)">s008</span>
-        <span class="session-branch" style="color:var(--accent)">paperclip-dev</span>
-        <span class="session-desc">Current interactive session &mdash; main repo</span>
-      </div>
-
-      <div class="session-row" style="border-left-color:var(--status-error)">
-        <div class="active-dot red"></div>
-        <span class="mono" style="color:var(--cyan)">28328</span>
-        <span class="mono" style="color:var(--text-secondary)">s000</span>
-        <span class="session-branch" style="color:var(--status-error)">cla-94 <span class="pill pill-error">broken</span></span>
-        <span class="session-desc">Sub-agent &mdash; worktree dir deleted</span>
-      </div>
-
-      <div class="session-row" style="border-left-color:var(--orange)">
-        <div class="active-dot yellow"></div>
-        <span class="mono" style="color:var(--cyan)">13947</span>
-        <span class="mono" style="color:var(--text-secondary)">s001</span>
-        <span class="session-branch" style="color:var(--muted)">clawteam/fd1</span>
-        <span class="session-desc">Redesign-team agent &mdash; empty workspace</span>
-      </div>
-
-      <div class="session-row" style="border-left-color:var(--orange)">
-        <div class="active-dot yellow"></div>
-        <span class="mono" style="color:var(--cyan)">26008</span>
-        <span class="mono" style="color:var(--text-secondary)">s007</span>
-        <span class="session-branch" style="color:var(--muted)">clawteam/fd1</span>
-        <span class="session-desc">Child process &mdash; same workspace as 13947</span>
-      </div>
-
-      <div class="session-row" style="border-left-color:var(--orange)">
-        <div class="active-dot yellow"></div>
-        <span class="mono" style="color:var(--cyan)">14325</span>
-        <span class="mono" style="color:var(--text-secondary)">s003</span>
-        <span class="session-branch" style="color:var(--muted)">clawteam/fd2</span>
-        <span class="session-desc">Redesign-team agent &mdash; empty workspace</span>
-      </div>
-
-      <div class="session-row" style="border-left-color:var(--orange)">
-        <div class="active-dot yellow"></div>
-        <span class="mono" style="color:var(--cyan)">14886</span>
-        <span class="mono" style="color:var(--text-secondary)">s004</span>
-        <span class="session-branch" style="color:var(--muted)">clawteam/fd3</span>
-        <span class="session-desc">Redesign-team agent &mdash; empty workspace</span>
-      </div>
-
-      <div class="session-row" style="border-left-color:var(--orange)">
-        <div class="active-dot yellow"></div>
-        <span class="mono" style="color:var(--cyan)">15448</span>
-        <span class="mono" style="color:var(--text-secondary)">s005</span>
-        <span class="session-branch" style="color:var(--muted)">clawteam/fd4</span>
-        <span class="session-desc">Redesign-team agent &mdash; empty workspace</span>
-      </div>
-
-      <div class="session-row" style="border-left-color:var(--orange)">
-        <div class="active-dot yellow"></div>
-        <span class="mono" style="color:var(--cyan)">16086</span>
-        <span class="mono" style="color:var(--text-secondary)">s006</span>
-        <span class="session-branch" style="color:var(--muted)">clawteam/fd5</span>
-        <span class="session-desc">Redesign-team agent &mdash; empty workspace</span>
-      </div>
-
-    </div></div>
-  </div>
-
-  <!-- ═══════════ Worktrees ═══════════ -->
-  <div class="collapsible">
-    <button class="collapse-btn" aria-expanded="true" onclick="toggle(this)">
-      <span class="dot" style="background:var(--purple)"></span>
-      Worktree Branches
-      <span class="pill pill-purple" style="margin-left:4px">9</span>
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <div class="collapse-body" data-open="true"><div class="collapse-inner">
-
-      <div class="wt-row" style="border-left-color:var(--purple)">
-        <span class="wt-name" style="color:var(--purple)">agent-a1911ee4</span>
-        <span class="wt-desc">Student appeals pages &mdash; Dark Sequence redesign</span>
-        <div class="wt-pills"><span class="pill pill-purple">Redesign</span><span class="pill pill-warning">130 behind</span></div>
-      </div>
-
-      <div class="wt-row" style="border-left-color:var(--purple)">
-        <span class="wt-name" style="color:var(--purple)">agent-a446fb38</span>
-        <span class="wt-desc">Online exam + help pages &mdash; Dark Sequence redesign</span>
-        <div class="wt-pills"><span class="pill pill-purple">Redesign</span><span class="pill pill-warning">130 behind</span></div>
-      </div>
-
-      <div class="wt-row" style="border-left-color:var(--purple)">
-        <span class="wt-name" style="color:var(--purple)">agent-aa08e69b</span>
-        <span class="wt-desc">Billing pages &mdash; Dark Sequence redesign</span>
-        <div class="wt-pills"><span class="pill pill-purple">Redesign</span><span class="pill pill-warning">130 behind</span></div>
-      </div>
-
-      <div class="wt-row" style="border-left-color:var(--purple)">
-        <span class="wt-name" style="color:var(--purple)">agent-aaa0710e</span>
-        <span class="wt-desc">Settings account page &mdash; Dark Sequence redesign</span>
-        <div class="wt-pills"><span class="pill pill-purple">Redesign</span><span class="pill pill-warning">130 behind</span></div>
-      </div>
-
-      <div class="wt-row" style="border-left-color:var(--purple)">
-        <span class="wt-name" style="color:var(--purple)">agent-af66e0cd</span>
-        <span class="wt-desc">API keys page &mdash; Dark Sequence redesign</span>
-        <div class="wt-pills"><span class="pill pill-purple">Redesign</span><span class="pill pill-warning">130 behind</span></div>
-      </div>
-
-      <div class="wt-row" style="border-left-color:var(--cyan)">
-        <span class="wt-name" style="color:var(--cyan)">cla-37-help-center</span>
-        <span class="wt-desc">Help center page &mdash; 2 unique commits</span>
-        <div class="wt-pills"><span class="pill pill-info">Feature</span><span class="pill pill-warning">130 behind</span></div>
-      </div>
-
-      <div class="wt-row" style="border-left-color:var(--accent)">
-        <span class="wt-name" style="color:var(--accent)">cla-75-status-badges</span>
-        <span class="wt-desc">StatusBadge + CertaintyBadge component fix</span>
-        <div class="wt-pills"><span class="pill pill-success">Fix</span><span class="pill pill-warning">130 behind</span></div>
-      </div>
-
-      <div class="wt-row" style="border-left-color:var(--accent)">
-        <span class="wt-name" style="color:var(--accent)">cla-93-student-perf</span>
-        <span class="wt-desc">Student Performance table, filters, Edit Grades modal</span>
-        <div class="wt-pills"><span class="pill pill-success">Feature</span><span class="pill pill-success">Up to date</span><span class="pill pill-info">9 untracked</span></div>
-      </div>
-
-      <div class="wt-row" style="border-left-color:var(--status-error)">
-        <span class="wt-name" style="color:var(--status-error)">cla-94-student-result</span>
-        <span class="wt-desc">Student result audit &mdash; 0 commits, directory deleted</span>
-        <div class="wt-pills"><span class="pill pill-error">Broken</span><span class="pill pill-error">Orphaned ref</span></div>
-      </div>
-
-    </div></div>
-  </div>
-
-  <!-- ═══════════ Actions ═══════════ -->
-  <div class="collapsible">
-    <button class="collapse-btn" aria-expanded="true" onclick="toggle(this)">
-      <span class="dot" style="background:var(--orange)"></span>
-      Recommended Actions
-      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-    </button>
-    <div class="collapse-body" data-open="true"><div class="collapse-inner">
-      <div class="summary">
-        <h3>Cleanup &amp; Rebase Plan</h3>
-        <ul>
-          <li>Kill 6 stale ClawTeam sessions (PIDs 13947, 26008, 14325, 14886, 15448, 16086)</li>
-          <li>Kill broken sub-agent PID 28328 &mdash; cla-94 worktree directory deleted</li>
-          <li>Prune orphaned git ref: <code>git worktree prune</code></li>
-          <li>Rebase 7 worktree branches onto <code style="color:var(--accent)">paperclip-dev</code></li>
-          <li>cla-93: commit or discard 9 untracked screenshots before merge</li>
-          <li>Delete cla-94 branch &mdash; 0 unique commits, no value</li>
-        </ul>
-      </div>
-    </div></div>
-  </div>
-
-  <div class="timestamp">Generated 2026-04-10 &bull; aegas_mvp_v3 &bull; paperclip-dev @ 9414f46</div>
-
+  </div></div>
 </div>
 
-<script>
-function toggle(btn) {
-  const open = btn.getAttribute('aria-expanded') === 'true';
-  btn.setAttribute('aria-expanded', String(!open));
-  btn.nextElementSibling.setAttribute('data-open', String(!open));
-}
-</script>
+<!-- ════════ COMMIT BREAKDOWN ════════ -->
+<div class="sec">
+  <button class="sb" aria-expanded="true" onclick="t(this)">
+    <span class="d" style="background:var(--pp)"></span>Commit Breakdown
+    <span class="p pp" style="margin-left:4px">137</span>
+    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="sc" data-o="1"><div class="si">
+    <div class="cg">
+      <div class="cc" style="border-left-color:var(--ac)"><div class="n" style="color:var(--ac)">37</div><h4 style="color:var(--ac)">Features</h4><div class="s">Grading pipeline, upload, rubrics, admin, help center, rosters, credits, results</div></div>
+      <div class="cc" style="border-left-color:var(--or)"><div class="n" style="color:var(--or)">25</div><h4 style="color:var(--or)">Bug Fixes</h4><div class="s">API alignment, GradingStep errors, ResultsStep, exports, S3 URLs, dedup</div></div>
+      <div class="cc" style="border-left-color:var(--cy)"><div class="n" style="color:var(--cy)">29</div><h4 style="color:var(--cy)">Redesigns</h4><div class="s">Dark Sequence: dashboard, courses, exams, rubrics, billing, settings, sidebar</div></div>
+      <div class="cc" style="border-left-color:var(--mt)"><div class="n" style="color:var(--mt)">29</div><h4 style="color:var(--mt)">Docs</h4><div class="s">API reference, pipeline spec, E2E screenshots, CLAUDE.md</div></div>
+      <div class="cc" style="border-left-color:var(--pk)"><div class="n" style="color:var(--pk)">3</div><h4 style="color:var(--pk)">Tests</h4><div class="s">E2E grading pipeline 24 scenarios, rubric, exams/billing</div></div>
+      <div class="cc" style="border-left-color:var(--pp)"><div class="n" style="color:var(--pp)">12</div><h4 style="color:var(--pp)">Merges</h4><div class="s">fd2-fd6 ClawTeam, cla-52, visual-enhancements, billing, exams</div></div>
+    </div>
+  </div></div>
+</div>
 
+<!-- ════════ GIT GRAPH ════════ -->
+<div class="sec">
+  <button class="sb" aria-expanded="true" onclick="t(this)">
+    <span class="d" style="background:var(--ac)"></span>Full Git Graph
+    <span class="p pa" style="margin-left:4px">all branches</span>
+    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="sc" data-o="1"><div class="si">
+    <div class="fw">
+      <!--
+        Layout rules:
+        - 8 horizontal rails, 60px apart, labels ABOVE each rail
+        - All text positioned ABOVE or BELOW rails, never on them
+        - Merge lines use L-shaped right-angle paths routed BETWEEN rails
+        - Fork drops go straight down in clear columns
+        - No line crosses text or nodes
+      -->
+      <svg style="width:1340px;min-width:1340px;height:580px" viewBox="0 0 1340 580">
+        <defs>
+          <marker id="ga1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L2,3Z" fill="#2EC4A0"/></marker>
+          <marker id="gp1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L2,3Z" fill="#9B7FFC"/></marker>
+          <marker id="gc1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L2,3Z" fill="#5DD4F5"/></marker>
+          <marker id="go1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L2,3Z" fill="#FBBF24"/></marker>
+          <marker id="gk1" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 L2,3Z" fill="#F472B6"/></marker>
+          <filter id="gg" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+
+        <!-- ═══ TIMELINE RULER (y=12) ═══ -->
+        <line x1="100" y1="16" x2="1320" y2="16" stroke="#2A2D38" stroke-width="1"/>
+        <line x1="140" y1="12" x2="140" y2="20" stroke="#5F636E"/><text x="140" y="9" text-anchor="middle" fill="#8B8F9A" font-size="9" font-weight="600">Apr 6</text>
+        <line x1="280" y1="12" x2="280" y2="20" stroke="#5F636E"/><text x="280" y="9" text-anchor="middle" fill="#8B8F9A" font-size="9" font-weight="600">Apr 7</text>
+        <line x1="460" y1="12" x2="460" y2="20" stroke="#5F636E"/><text x="460" y="9" text-anchor="middle" fill="#8B8F9A" font-size="9" font-weight="600">Apr 8</text>
+        <line x1="760" y1="12" x2="760" y2="20" stroke="#5F636E"/><text x="760" y="9" text-anchor="middle" fill="#8B8F9A" font-size="9" font-weight="600">Apr 9</text>
+        <line x1="1100" y1="12" x2="1100" y2="20" stroke="#5F636E"/><text x="1100" y="9" text-anchor="middle" fill="#8B8F9A" font-size="9" font-weight="600">Apr 10</text>
+
+        <!-- ═══ RAIL 1: main (y=50) ═══ -->
+        <text x="14" y="42" fill="#2EC4A0" font-size="10" font-weight="700">main</text>
+        <line x1="100" y1="50" x2="520" y2="50" stroke="#2EC4A0" stroke-width="2.5" opacity=".5"/>
+        <line x1="520" y1="50" x2="1320" y2="50" stroke="#2EC4A0" stroke-width="1" opacity=".15" stroke-dasharray="6,6"/>
+        <!-- commits -->
+        <circle cx="140" cy="50" r="4" fill="#2EC4A0"/><text x="140" y="68" text-anchor="middle" fill="#8B8F9A" font-size="7">PR #1</text>
+        <circle cx="210" cy="50" r="3" fill="#2EC4A0" opacity=".6"/>
+        <circle cx="280" cy="50" r="4" fill="#2EC4A0"/><text x="280" y="68" text-anchor="middle" fill="#8B8F9A" font-size="7">api-integ</text>
+        <!-- Fork point -->
+        <circle cx="460" cy="50" r="7" fill="none" stroke="#FBBF24" stroke-width="2.5"/>
+        <circle cx="460" cy="50" r="3" fill="#FBBF24"/>
+        <text x="460" y="38" text-anchor="middle" fill="#FBBF24" font-size="9" font-weight="700">fba7144</text>
+        <text x="460" y="68" text-anchor="middle" fill="#8B8F9A" font-size="8">fork point</text>
+
+        <!-- ═══ RAIL 2: paperclip-dev (y=120) ═══ -->
+        <text x="14" y="112" fill="#2EC4A0" font-size="10" font-weight="700">paperclip</text>
+        <line x1="460" y1="120" x2="1280" y2="120" stroke="#2EC4A0" stroke-width="3" opacity=".6"/>
+        <!-- Fork drop from main: straight down, clear column at x=460 -->
+        <path d="M460,57 L460,78 Q460,84 466,84 L466,84 Q472,84 472,90 L472,114" stroke="#2EC4A0" stroke-width="2" fill="none" marker-end="url(#ga1)"/>
+
+        <!-- Commits on paperclip-dev -->
+        <circle cx="490" cy="120" r="3" fill="#2EC4A0" opacity=".5"/>
+        <circle cx="510" cy="120" r="3" fill="#2EC4A0" opacity=".5"/>
+        <circle cx="540" cy="120" r="4" fill="#2EC4A0"/>
+        <text x="540" y="140" text-anchor="middle" fill="#8B8F9A" font-size="7">rubrics</text>
+
+        <circle cx="680" cy="120" r="5" fill="#5DD4F5"/><text x="680" y="140" text-anchor="middle" fill="#5DD4F5" font-size="7" font-weight="600">Dark Seq</text>
+        <circle cx="740" cy="120" r="3" fill="#2EC4A0"/>
+        <circle cx="790" cy="120" r="5" fill="#2EC4A0" filter="url(#gg)"/><text x="790" y="140" text-anchor="middle" fill="#2EC4A0" font-size="7" font-weight="600">grading pipeline</text>
+
+        <!-- fd merges (purple dots) -->
+        <circle cx="850" cy="120" r="4" fill="#9B7FFC"/><circle cx="870" cy="120" r="4" fill="#9B7FFC"/>
+        <circle cx="890" cy="120" r="4" fill="#9B7FFC"/><circle cx="910" cy="120" r="4" fill="#9B7FFC"/>
+        <circle cx="935" cy="120" r="4" fill="#9B7FFC"/><circle cx="955" cy="120" r="4" fill="#9B7FFC"/>
+        <text x="900" y="140" text-anchor="middle" fill="#9B7FFC" font-size="7" font-weight="600">fd2-fd6 merges</text>
+
+        <!-- E2E -->
+        <circle cx="1020" cy="120" r="4" fill="#F472B6"/><text x="1020" y="140" text-anchor="middle" fill="#F472B6" font-size="7" font-weight="600">E2E tests</text>
+        <!-- cla-52 -->
+        <circle cx="1060" cy="120" r="4" fill="#9B7FFC"/><text x="1060" y="140" text-anchor="middle" fill="#9B7FFC" font-size="7">cla-52</text>
+
+        <!-- origin/paperclip-dev marker -->
+        <circle cx="1100" cy="120" r="5" fill="none" stroke="#FBBF24" stroke-width="2" stroke-dasharray="3,2"/>
+        <text x="1100" y="108" text-anchor="middle" fill="#FBBF24" font-size="8" font-weight="600">origin/paperclip-dev</text>
+
+        <!-- CLA fixes -->
+        <circle cx="1140" cy="120" r="3" fill="#FBBF24"/><circle cx="1160" cy="120" r="3" fill="#FBBF24"/>
+        <circle cx="1180" cy="120" r="3" fill="#FBBF24"/><circle cx="1200" cy="120" r="3" fill="#FBBF24"/>
+        <text x="1170" y="108" text-anchor="middle" fill="#FBBF24" font-size="7" font-weight="600">CLA bug fixes (17 unpushed)</text>
+
+        <!-- HEAD -->
+        <circle cx="1280" cy="120" r="8" fill="none" stroke="#2EC4A0" stroke-width="2.5"/>
+        <circle cx="1280" cy="120" r="3.5" fill="#2EC4A0" filter="url(#gg)"/>
+        <text x="1280" y="108" text-anchor="middle" fill="#2EC4A0" font-size="10" font-weight="800">HEAD</text>
+        <text x="1280" y="148" text-anchor="middle" fill="#2EC4A0" font-size="8" font-weight="600">a5f1cce</text>
+        <circle cx="1280" cy="120" r="12" fill="none" stroke="#2EC4A0" stroke-opacity=".08"><animate attributeName="stroke-opacity" values=".04;.22;.04" dur="2.5s" repeatCount="indefinite"/><animate attributeName="r" values="11;15;11" dur="2.5s" repeatCount="indefinite"/></circle>
+
+        <!-- Working copy -->
+        <rect x="1296" y="108" width="38" height="24" rx="4" fill="rgba(251,191,36,.06)" stroke="#FBBF24" stroke-opacity=".4" stroke-dasharray="3,2"/>
+        <text x="1315" y="122" text-anchor="middle" fill="#FBBF24" font-size="8" font-weight="600">WC</text>
+
+        <!-- ═══ RAIL 3: dev (y=195) ═══ -->
+        <text x="14" y="190" fill="#8B8F9A" font-size="9" font-weight="600">dev</text>
+        <line x1="460" y1="198" x2="760" y2="198" stroke="#8B8F9A" stroke-width="1.5" opacity=".5"/>
+        <!-- Fork: drops from fork point column, right-angle to avoid main rail text -->
+        <path d="M460,68 L460,80 Q460,86 454,86 L440,86 Q434,86 434,92 L434,192" stroke="#8B8F9A" stroke-width="1.5" fill="none" stroke-dasharray="4,3" marker-end="url(#ga1)"/>
+        <circle cx="720" cy="198" r="4" fill="#8B8F9A"/><text x="720" y="214" text-anchor="middle" fill="#8B8F9A" font-size="7">8a07e28</text>
+        <!-- Merge up to paperclip: L-shape routed at x=738 (between rails) -->
+        <path d="M738,198 L738,152 L738,126" stroke="#8B8F9A" stroke-width="1.5" fill="none" stroke-dasharray="4,3" opacity=".5" marker-end="url(#ga1)"/>
+
+        <!-- ═══ RAIL 4: visual-enhancements (y=260) ═══ -->
+        <text x="14" y="255" fill="#5DD4F5" font-size="9" font-weight="600">visual-enh</text>
+        <line x1="460" y1="262" x2="710" y2="262" stroke="#5DD4F5" stroke-width="2" opacity=".5"/>
+        <!-- Fork: separate column x=420 to avoid overlap -->
+        <path d="M460,68 L460,80 Q460,86 454,86 L420,86 Q414,86 414,92 L414,256" stroke="#5DD4F5" stroke-width="1.5" fill="none" stroke-dasharray="5,3" opacity=".6" marker-end="url(#gc1)"/>
+        <!-- 30 commits as density bar -->
+        <rect x="470" y="258" width="220" height="8" rx="4" fill="rgba(93,212,245,.15)"/>
+        <rect x="470" y="258" width="220" height="8" rx="4" fill="url(#none)" stroke="#5DD4F5" stroke-opacity=".3"/>
+        <text x="580" y="280" text-anchor="middle" fill="#5DD4F5" font-size="8">30 style commits (Tasks 1-22)</text>
+        <!-- Merge up to dev: routed at x=710, no crossing -->
+        <path d="M700,262 L710,262 L710,204" stroke="#5DD4F5" stroke-width="1.5" fill="none" opacity=".6" marker-end="url(#gc1)"/>
+
+        <!-- ═══ RAIL 5: billing (y=320) ═══ -->
+        <text x="14" y="316" fill="#F472B6" font-size="9" font-weight="600">billing</text>
+        <line x1="680" y1="322" x2="800" y2="322" stroke="#F472B6" stroke-width="2" opacity=".5"/>
+        <!-- Fork from dev area -->
+        <path d="M680,214 L680,316" stroke="#F472B6" stroke-width="1.5" fill="none" stroke-dasharray="4,3" opacity=".5" marker-end="url(#gk1)"/>
+        <circle cx="710" cy="322" r="3" fill="#F472B6" opacity=".6"/>
+        <circle cx="730" cy="322" r="3" fill="#F472B6" opacity=".7"/>
+        <circle cx="750" cy="322" r="3" fill="#F472B6" opacity=".8"/>
+        <circle cx="770" cy="322" r="4" fill="#F472B6"/>
+        <text x="740" y="340" text-anchor="middle" fill="#F472B6" font-size="7">5 billing commits</text>
+        <!-- Merge up: routed at x=780, clear path -->
+        <path d="M784,322 L784,204" stroke="#F472B6" stroke-width="1.5" fill="none" opacity=".5" marker-end="url(#gk1)"/>
+
+        <!-- ═══ RAIL 6: online-exam (y=380) ═══ -->
+        <text x="14" y="376" fill="#FBBF24" font-size="9" font-weight="600">online-exm</text>
+        <line x1="700" y1="382" x2="820" y2="382" stroke="#FBBF24" stroke-width="2" opacity=".5"/>
+        <circle cx="770" cy="382" r="4" fill="#FBBF24"/>
+        <text x="770" y="400" text-anchor="middle" fill="#FBBF24" font-size="7">Features 3,4,7</text>
+        <!-- Merge up: at x=808, avoids billing merge at 784 -->
+        <path d="M808,382 L808,204" stroke="#FBBF24" stroke-width="1.5" fill="none" opacity=".5" marker-end="url(#go1)"/>
+
+        <!-- ═══ RAIL 7: fd2-fd6 ClawTeam (y=440) ═══ -->
+        <text x="14" y="436" fill="#9B7FFC" font-size="9" font-weight="600">fd2-fd6</text>
+        <line x1="820" y1="442" x2="970" y2="442" stroke="#9B7FFC" stroke-width="2" opacity=".5"/>
+        <!-- 5 commits, labels BELOW -->
+        <circle cx="840" cy="442" r="4" fill="#9B7FFC"/><text x="840" y="460" text-anchor="middle" fill="#9B7FFC" font-size="7">fd2</text>
+        <circle cx="870" cy="442" r="4" fill="#9B7FFC"/><text x="870" y="460" text-anchor="middle" fill="#9B7FFC" font-size="7">fd3</text>
+        <circle cx="900" cy="442" r="4" fill="#9B7FFC"/><text x="900" y="460" text-anchor="middle" fill="#9B7FFC" font-size="7">fd4</text>
+        <circle cx="930" cy="442" r="4" fill="#9B7FFC"/><text x="930" y="460" text-anchor="middle" fill="#9B7FFC" font-size="7">fd5</text>
+        <circle cx="960" cy="442" r="4" fill="#9B7FFC"/><text x="960" y="460" text-anchor="middle" fill="#9B7FFC" font-size="7">fd6</text>
+        <!-- Single merge line from group midpoint up to paperclip rail -->
+        <path d="M900,436 L900,420 L986,420 L986,126" stroke="#9B7FFC" stroke-width="2" fill="none" opacity=".6" marker-end="url(#gp1)"/>
+
+        <!-- ═══ RAIL 8: unmerged worktrees (y=510) ═══ -->
+        <text x="14" y="505" fill="#9B7FFC" font-size="9" font-weight="600">worktrees</text>
+        <line x1="460" y1="512" x2="1280" y2="512" stroke="#9B7FFC" stroke-width="1.5" stroke-dasharray="6,4" opacity=".3"/>
+        <!-- Fork drop from fork point, separate column x=448 -->
+        <path d="M460,68 L460,80 Q460,86 454,86 L448,86 Q442,86 442,92 L442,506" stroke="#9B7FFC" stroke-width="1.5" fill="none" stroke-dasharray="5,4" opacity=".4" marker-end="url(#gp1)"/>
+
+        <!-- 5 agent worktrees (purple dashed) -->
+        <circle cx="500" cy="512" r="4" fill="#9B7FFC" opacity=".6"/>
+        <circle cx="530" cy="512" r="4" fill="#9B7FFC" opacity=".6"/>
+        <circle cx="560" cy="512" r="4" fill="#9B7FFC" opacity=".6"/>
+        <circle cx="590" cy="512" r="4" fill="#9B7FFC" opacity=".6"/>
+        <circle cx="620" cy="512" r="4" fill="#9B7FFC" opacity=".6"/>
+        <text x="560" y="530" text-anchor="middle" fill="#9B7FFC" font-size="8">5 agent-* redesign (stale, 130 behind)</text>
+
+        <!-- cla-37 (cyan) -->
+        <circle cx="700" cy="512" r="4" fill="#5DD4F5"/>
+        <text x="700" y="530" text-anchor="middle" fill="#5DD4F5" font-size="7" font-weight="600">cla-37 help</text>
+
+        <!-- cla-75 (green) -->
+        <circle cx="800" cy="512" r="4" fill="#2EC4A0"/>
+        <text x="800" y="530" text-anchor="middle" fill="#2EC4A0" font-size="7" font-weight="600">cla-75 badges</text>
+
+        <!-- cla-94 BROKEN (red) -->
+        <circle cx="920" cy="512" r="4" fill="none" stroke="#EF4444" stroke-width="2" stroke-dasharray="2,2"/>
+        <text x="920" y="530" text-anchor="middle" fill="#EF4444" font-size="7" font-weight="600">cla-94 BROKEN</text>
+        <!-- X -->
+        <line x1="912" y1="505" x2="918" y2="519" stroke="#EF4444" stroke-width="2" opacity=".7"/>
+        <line x1="918" y1="505" x2="912" y2="519" stroke="#EF4444" stroke-width="2" opacity=".7"/>
+
+        <!-- cla-93 (green, at HEAD — branch from paperclip-dev near HEAD) -->
+        <circle cx="1200" cy="512" r="5" fill="#2EC4A0" filter="url(#gg)"/>
+        <text x="1200" y="530" text-anchor="middle" fill="#2EC4A0" font-size="8" font-weight="700">cla-93 perf (at HEAD)</text>
+        <!-- Drop from paperclip near HEAD, own clear column x=1200 -->
+        <path d="M1200,148 L1200,506" stroke="#2EC4A0" stroke-width="2" fill="none" stroke-dasharray="5,3" opacity=".5" marker-end="url(#ga1)"/>
+
+        <!-- Working copy detail -->
+        <rect x="1260" y="540" width="70" height="34" rx="5" fill="rgba(251,191,36,.04)" stroke="#FBBF24" stroke-opacity=".3" stroke-dasharray="4,3"/>
+        <text x="1295" y="554" text-anchor="middle" fill="#FBBF24" font-size="8" font-weight="600">Working Copy</text>
+        <text x="1295" y="566" text-anchor="middle" fill="#8B8F9A" font-size="7">17 mod, 10+ new</text>
+
+        <!-- ═══ ANIMATED PARTICLES ═══ -->
+        <circle r="4" fill="#2EC4A0" filter="url(#gg)" class="pt" style="offset-path:path('M460,120 L1280,120')"><animate attributeName="r" values="3;6;3" dur="2.4s" repeatCount="indefinite"/></circle>
+        <circle r="3" fill="#9B7FFC" filter="url(#gg)" class="pt s" style="offset-path:path('M900,436 L900,420 L986,420 L986,126');animation-delay:.6s"><animate attributeName="r" values="2;4;2" dur="3.8s" repeatCount="indefinite"/></circle>
+        <circle r="3" fill="#FBBF24" filter="url(#gg)" class="pt" style="offset-path:path('M1100,120 L1280,120');animation-delay:1.2s"><animate attributeName="r" values="2;5;2" dur="2.4s" repeatCount="indefinite"/></circle>
+        <circle r="3" fill="#5DD4F5" filter="url(#gg)" class="pt s" style="offset-path:path('M700,262 L710,262 L710,204');animation-delay:.9s"/>
+
+      </svg>
+    </div>
+  </div></div>
+</div>
+
+<!-- ════════ TIMELINE ════════ -->
+<div class="sec">
+  <button class="sb" aria-expanded="true" onclick="t(this)">
+    <span class="d" style="background:var(--ac)"></span>paperclip-dev Timeline
+    <span class="p po" style="margin-left:4px">17 unpushed</span>
+    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="sc" data-o="1"><div class="si">
+
+    <div style="margin-bottom:10px;padding:6px 10px;background:rgba(245,158,11,.05);border-radius:5px;border-left:3px solid var(--or)">
+      <span style="font-size:10px;color:var(--or);font-weight:600">UNPUSHED — 17 commits ahead of origin/paperclip-dev</span>
+    </div>
+
+    <div class="tl">
+      <div class="ti fix"><div class="tr"><span class="th">a5f1cce</span><span class="p po">fix</span><span class="tm">align Email &amp; AI Insight flows with XAM API</span><span class="td">CLA-96</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">2cd1f9b</span><span class="p po">fix</span><span class="tm">source Class Average chart from gradebook API</span><span class="td">CLA-102</span></div></div>
+      <div class="ti feat"><div class="tr"><span class="th">83c58e3</span><span class="p pa">feat</span><span class="tm">replace Exams chart with Class Average by Course</span><span class="td">CLA-102</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">00baaf5</span><span class="p po">fix</span><span class="tm">export flows — BOM CSV, PDF errors, Share, toast</span><span class="td">CLA-95</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">66efd72</span><span class="p po">fix</span><span class="tm">StudentResultView — broken fetch, key points, XAM fields</span><span class="td">CLA-94</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">9414f46</span><span class="p po">fix</span><span class="tm">replace mocked Performance Analysis with real scores</span><span class="td">CLA-92</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">4ab735b</span><span class="p po">fix</span><span class="tm">align ResultsStep summary cards with XAM</span><span class="td">CLA-91</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">90befc5</span><span class="p po">fix</span><span class="tm">GradingStep a11y — keyboard nav, ARIA, focus</span><span class="td">CLA-79</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">c6e4ce0</span><span class="p po">fix</span><span class="tm">responsive &amp; mobile for GradingStep</span><span class="td">CLA-78</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">75b8f12</span><span class="p po">fix</span><span class="tm">GradingStep error handling — all 6 failure modes</span><span class="td">CLA-77</span></div></div>
+      <div class="ti docs"><div class="tr"><span class="th">5b0feff</span><span class="p pm">docs</span><span class="tm">UI/UX design freeze for finalized pages</span><span class="td">CLA-90</span></div></div>
+      <div class="ti feat"><div class="tr"><span class="th">72288d4</span><span class="p pa">feat</span><span class="tm">neon teal glow — dual-layer radial gradient</span><span class="td">CLA-90</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">8339582</span><span class="p po">fix</span><span class="tm">GradingStep configure — cyan Verified mode, empty state</span><span class="td">CLA-71</span></div></div>
+      <div class="ti feat"><div class="tr"><span class="th">90de336</span><span class="p pa">feat</span><span class="tm">help center — search, FAQ accordion, feature guides</span><span class="td">CLA-37</span></div></div>
+      <div class="ti docs"><div class="tr"><span class="th">6e28bb4</span><span class="p pm">docs</span><span class="tm">mark Task 12 complete — full E2E audit done</span><span class="td"></span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">1b51856</span><span class="p po">fix</span><span class="tm">resolve all issues from E2E audit (Task 12.5)</span><span class="td"></span></div></div>
+      <div class="ti feat"><div class="tr"><span class="th">0d71838</span><span class="p pa">feat</span><span class="tm">UI/UX polish — tokens, toasts, skeletons, hover, a11y</span><span class="td">CLA-51</span></div></div>
+    </div>
+
+    <div style="margin:14px 0 10px;padding:6px 10px;background:rgba(46,196,160,.04);border-radius:5px;border-left:3px solid var(--ac)">
+      <span style="font-size:10px;color:var(--ac);font-weight:600">PUSHED — origin/paperclip-dev @ 5a3b0f5</span>
+    </div>
+
+    <div class="tl">
+      <div class="ti feat"><div class="tr"><span class="th">5a3b0f5</span><span class="p pa">feat</span><span class="tm">student result detail view, rows, search, appeal button</span><span class="td">CLA-54</span></div></div>
+      <div class="ti merge"><div class="tr"><span class="th">113675b</span><span class="p pp">merge</span><span class="tm">cla-52 infrastructure into paperclip-dev</span></div></div>
+      <div class="ti test"><div class="tr"><span class="th">40ccfd6</span><span class="p ppk">test</span><span class="tm">E2E: exams, appeals, billing, settings</span></div></div>
+      <div class="ti feat"><div class="tr"><span class="th">21b4d76</span><span class="p pa">feat</span><span class="tm">admin panel, AI insights, sidebar admin link</span></div></div>
+      <div class="ti redesign"><div class="tr"><span class="th">5097e54</span><span class="p pc">redesign</span><span class="tm">settings, billing, API keys, appeals, help — Dark Sequence</span></div></div>
+      <div class="ti merge"><div class="tr"><span class="th">e706436</span><span class="p pp">merge</span><span class="tm">fd6 ResultsStep fixes, auto-resume grading</span></div></div>
+      <div class="ti test"><div class="tr"><span class="th">55b76fe</span><span class="p ppk">test</span><span class="tm">E2E grading Steps 3-5 — 24 scenarios</span></div></div>
+      <div class="ti feat"><div class="tr"><span class="th">d49b3d4</span><span class="p pa">feat</span><span class="tm">admin API proxy, exam insights, client types</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">de13af2</span><span class="p po">fix</span><span class="tm">surface XAM errors in grading proxies</span></div></div>
+      <div class="ti merge"><div class="tr"><span class="th">47e4bc9</span><span class="p pp">merge</span><span class="tm">fd5 rubrics redesign</span></div></div>
+      <div class="ti merge"><div class="tr"><span class="th">80ee6fb</span><span class="p pp">merge</span><span class="tm">fd4 ExamList, Wizard, GradingStep, Results, Appeals</span></div></div>
+      <div class="ti merge"><div class="tr"><span class="th">55ae25b</span><span class="p pp">merge</span><span class="tm">fd3 courses &amp; rosters redesign</span></div></div>
+      <div class="ti merge"><div class="tr"><span class="th">0a06c41</span><span class="p pp">merge</span><span class="tm">fd2 dashboard redesign</span></div></div>
+      <div class="ti redesign"><div class="tr"><span class="th">f7764fd</span><span class="p pc">redesign</span><span class="tm">foundation — landing, layouts, sidebar, mobile drawer</span></div></div>
+      <div class="ti fix"><div class="tr"><span class="th">e880a0f</span><span class="p po">fix</span><span class="tm">dedup submissions — newest grading run only</span></div></div>
+      <div class="ti feat"><div class="tr"><span class="th">47f1003</span><span class="p pa">feat</span><span class="tm">Step 4 grading — credit deduction, submission reg, S3 copy</span></div></div>
+      <div class="ti feat"><div class="tr"><span class="th">ad117ac</span><span class="p pa">feat</span><span class="tm">Step 3 upload — PDF splitter, Auto-Detect, preview</span></div></div>
+      <div class="ti feat"><div class="tr"><span class="th">4c17809</span><span class="p pa">feat</span><span class="tm">align rubric step with XAM pipeline spec</span></div></div>
+      <div class="ti feat"><div class="tr"><span class="th">829cc7e</span><span class="p pa">feat</span><span class="tm">roster CSV parsing, course creation, tab elevation</span></div></div>
+      <div class="ti redesign"><div class="tr"><span class="th">1a00f05</span><span class="p pc">redesign</span><span class="tm">sidebar &amp; dashboard — Dark Sequence</span></div></div>
+    </div>
+
+  </div></div>
+</div>
+
+<!-- ════════ WORKTREES ════════ -->
+<div class="sec">
+  <button class="sb" aria-expanded="true" onclick="t(this)">
+    <span class="d" style="background:var(--cy)"></span>Unmerged Worktrees
+    <span class="p pc" style="margin-left:4px">9</span>
+    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="sc" data-o="1"><div class="si">
+    <div class="row" style="border-left-color:var(--pp)"><span class="lb" style="color:var(--pp)">agent-a1911ee4</span><span class="p pp">redesign</span><span class="ds">Student appeals — Dark Sequence</span><span class="p po">130 behind</span></div>
+    <div class="row" style="border-left-color:var(--pp)"><span class="lb" style="color:var(--pp)">agent-a446fb38</span><span class="p pp">redesign</span><span class="ds">Online exam + help — Dark Sequence</span><span class="p po">130 behind</span></div>
+    <div class="row" style="border-left-color:var(--pp)"><span class="lb" style="color:var(--pp)">agent-aa08e69b</span><span class="p pp">redesign</span><span class="ds">Billing — Dark Sequence</span><span class="p po">130 behind</span></div>
+    <div class="row" style="border-left-color:var(--pp)"><span class="lb" style="color:var(--pp)">agent-aaa0710e</span><span class="p pp">redesign</span><span class="ds">Settings account — Dark Sequence</span><span class="p po">130 behind</span></div>
+    <div class="row" style="border-left-color:var(--pp)"><span class="lb" style="color:var(--pp)">agent-af66e0cd</span><span class="p pp">redesign</span><span class="ds">API keys — Dark Sequence</span><span class="p po">130 behind</span></div>
+    <div class="row" style="border-left-color:var(--cy)"><span class="lb" style="color:var(--cy)">cla-37-help-center</span><span class="p pc">feat</span><span class="ds">Help center page — 2 commits</span><span class="p po">130 behind</span></div>
+    <div class="row" style="border-left-color:var(--ac)"><span class="lb" style="color:var(--ac)">cla-75-status-badges</span><span class="p pa">fix</span><span class="ds">StatusBadge + CertaintyBadge</span><span class="p po">130 behind</span></div>
+    <div class="row" style="border-left-color:var(--ac)"><span class="lb" style="color:var(--ac)">cla-93-student-perf</span><span class="p pa">feat</span><span class="ds">Student Performance table, filters, Edit Grades</span><span class="p pa">at HEAD</span></div>
+    <div class="row" style="border-left-color:var(--rd)"><span class="lb" style="color:var(--rd)">cla-94-student-result</span><span class="p pr">broken</span><span class="ds">0 commits, dir deleted, orphaned ref</span><span class="p pr">delete</span></div>
+  </div></div>
+</div>
+
+<!-- ════════ SESSIONS ════════ -->
+<div class="sec">
+  <button class="sb" aria-expanded="true" onclick="t(this)">
+    <span class="d" style="background:var(--or)"></span>Claude Sessions
+    <span class="p po" style="margin-left:4px">8</span>
+    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="sc" data-o="1"><div class="si">
+    <div class="row" style="border-left-color:var(--ac)"><div class="dot dg"></div><span class="mn" style="color:var(--cy)">30148</span><span class="lb" style="color:var(--ac)">paperclip-dev</span><span class="ds">Current session — main repo</span><span class="p pa">active</span></div>
+    <div class="row" style="border-left-color:var(--rd)"><div class="dot dr"></div><span class="mn" style="color:var(--cy)">28328</span><span class="lb" style="color:var(--rd)">cla-94</span><span class="ds">Sub-agent — worktree deleted</span><span class="p pr">broken</span></div>
+    <div class="row" style="border-left-color:var(--or)"><div class="dot dy"></div><span class="mn" style="color:var(--cy)">13947</span><span class="lb" style="color:var(--mt)">clawteam/fd1</span><span class="ds">Redesign agent — empty</span><span class="p po">stale</span></div>
+    <div class="row" style="border-left-color:var(--or)"><div class="dot dy"></div><span class="mn" style="color:var(--cy)">26008</span><span class="lb" style="color:var(--mt)">clawteam/fd1</span><span class="ds">Child of 13947</span><span class="p po">stale</span></div>
+    <div class="row" style="border-left-color:var(--or)"><div class="dot dy"></div><span class="mn" style="color:var(--cy)">14325</span><span class="lb" style="color:var(--mt)">clawteam/fd2</span><span class="ds">Redesign agent — empty</span><span class="p po">stale</span></div>
+    <div class="row" style="border-left-color:var(--or)"><div class="dot dy"></div><span class="mn" style="color:var(--cy)">14886</span><span class="lb" style="color:var(--mt)">clawteam/fd3</span><span class="ds">Redesign agent — empty</span><span class="p po">stale</span></div>
+    <div class="row" style="border-left-color:var(--or)"><div class="dot dy"></div><span class="mn" style="color:var(--cy)">15448</span><span class="lb" style="color:var(--mt)">clawteam/fd4</span><span class="ds">Redesign agent — empty</span><span class="p po">stale</span></div>
+    <div class="row" style="border-left-color:var(--or)"><div class="dot dy"></div><span class="mn" style="color:var(--cy)">16086</span><span class="lb" style="color:var(--mt)">clawteam/fd5</span><span class="ds">Redesign agent — empty</span><span class="p po">stale</span></div>
+  </div></div>
+</div>
+
+<!-- ════════ ACTIONS ════════ -->
+<div class="sec">
+  <button class="sb" aria-expanded="true" onclick="t(this)">
+    <span class="d" style="background:var(--or)"></span>Recommended Actions
+    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="sc" data-o="1"><div class="si">
+    <div class="sum">
+      <h3>Immediate</h3>
+      <ul>
+        <li><code style="color:var(--ac)">git push origin paperclip-dev</code> — 17 commits ahead</li>
+        <li>Kill 6 stale ClawTeam PIDs (13947, 26008, 14325, 14886, 15448, 16086)</li>
+        <li>Kill PID 28328 + <code>git worktree prune</code></li>
+        <li>Delete <code style="color:var(--rd)">cla-94</code> branch — 0 commits, orphaned</li>
+      </ul>
+    </div>
+    <div class="sum" style="margin-top:10px;border-left-color:var(--pp)">
+      <h3 style="color:var(--pp)">Cleanup</h3>
+      <ul style="--or:var(--pp)">
+        <li>5 agent-* worktrees already merged via <code>5097e54</code> — delete branches</li>
+        <li>cla-37 already merged via <code>90de336</code> — delete branch</li>
+        <li>cla-75 needs rebase onto paperclip-dev then merge</li>
+        <li>cla-93 at HEAD — commit 9 screenshots, then merge</li>
+      </ul>
+    </div>
+  </div></div>
+</div>
+
+<div class="ts">Generated 2026-04-10 &bull; aegas_mvp_v3 &bull; paperclip-dev @ a5f1cce &bull; 137 commits / 14 branches</div>
+
+</div>
+<script>function t(b){const e=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',String(!e));b.nextElementSibling.setAttribute('data-o',e?'0':'1')}</script>
 </body>
 </html>
