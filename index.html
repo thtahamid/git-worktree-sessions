@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Worktree &amp; Sessions — aegas_mvp_v3</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sidebar-bg: #090C14;
+  --bg: #0E1119;
+  --bg-input: #14161E;
+  --surface: #181B23;
+  --surface-raised: #1F222C;
+  --text: #E4E6EB;
+  --text-secondary: #8B8F9A;
+  --muted: #5F636E;
+  --border: #2A2D38;
+  --border-light: #22252F;
+  --accent: #2EC4A0;
+  --accent-hover: #3DD4B0;
+  --accent-light: rgba(46, 196, 160, 0.12);
+  --accent-icon-bg: rgba(46, 196, 160, 0.10);
+  --accent-icon-border: rgba(46, 196, 160, 0.25);
+  --purple: #7C5CFC;
+  --purple-light: rgba(124, 92, 252, 0.12);
+  --orange: #F59E0B;
+  --orange-light: rgba(245, 158, 11, 0.12);
+  --pink: #EC4899;
+  --pink-light: rgba(236, 72, 153, 0.12);
+  --cyan: #38BDF8;
+  --cyan-light: rgba(56, 189, 248, 0.12);
+  --status-success: #2EC4A0;
+  --status-error: #EF4444;
+  --status-warning: #F59E0B;
+  --status-info: #38BDF8;
+  --red-soft: rgba(239, 68, 68, 0.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', 'Helvetica Neue', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.page { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+
+/* ── Header ── */
+.page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+.page-header-icon {
+  width: 42px; height: 42px;
+  background: var(--accent-icon-bg);
+  border: 1px solid var(--accent-icon-border);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.page-header-icon svg { color: var(--accent); }
+.page-title { font-size: 22px; font-weight: 800; letter-spacing: 0.08em; }
+.page-subtitle { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+/* ── Stat Cards ── */
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+.stat-card {
+  background: var(--surface);
+  border-radius: 8px;
+  border-left: 2px solid var(--accent-icon-border);
+  padding: 20px 24px;
+}
+.stat-label { font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
+.stat-value { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; }
+.stat-meta { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.stat-value.accent { color: var(--accent); }
+.stat-value.orange { color: var(--orange); }
+.stat-value.purple { color: var(--purple); }
+.stat-value.error { color: var(--status-error); }
+
+/* ── Collapsible Sections ── */
+.collapsible { margin-bottom: 24px; }
+.collapsible-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 12px 0;
+  text-align: left;
+  transition: color 150ms ease;
+}
+.collapsible-trigger .dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+.collapsible-trigger .chevron {
+  margin-left: auto;
+  width: 16px; height: 16px;
+  color: var(--muted);
+  transition: transform 200ms ease;
+  flex-shrink: 0;
+}
+.collapsible-trigger[aria-expanded="false"] .chevron { transform: rotate(-90deg); }
+.collapsible-trigger[aria-expanded="true"] .chevron { transform: rotate(0deg); }
+@media (hover: hover) {
+  .collapsible-trigger:hover { color: var(--accent); }
+  .collapsible-trigger:hover .chevron { color: var(--accent); }
+}
+.collapsible-content {
+  overflow: hidden;
+  transition: max-height 300ms ease, opacity 200ms ease;
+}
+.collapsible-content[data-collapsed="true"] { max-height: 0; opacity: 0; pointer-events: none; }
+.collapsible-content[data-collapsed="false"] { max-height: 3000px; opacity: 1; }
+.collapsible-body { padding-top: 8px; }
+
+/* ── Pipeline ── */
+.pipeline-container {
+  background: var(--surface);
+  border-radius: 8px;
+  border-left: 2px solid var(--accent-icon-border);
+  padding: 24px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.pipeline-label { font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.04em; }
+.pipeline { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
+.pipeline-node {
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 12px 16px;
+  min-width: 110px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  transition: background-color 150ms ease;
+}
+@media (hover: hover) { .pipeline-node:hover { background: var(--surface-raised); } }
+.pipeline-node-label { font-size: 11px; font-weight: 500; color: var(--muted); margin-bottom: 3px; }
+.pipeline-node-value { font-size: 13px; font-weight: 600; }
+.pipeline-node.active .pipeline-node-value { color: var(--accent); }
+.pipeline-node.warning .pipeline-node-value { color: var(--orange); }
+.pipeline-node.error .pipeline-node-value { color: var(--status-error); }
+.pipeline-node.info .pipeline-node-value { color: var(--cyan); }
+.pipeline-node.purple .pipeline-node-value { color: var(--purple); }
+
+.pipeline-edge { width: 40px; height: 2px; position: relative; flex-shrink: 0; }
+.pipeline-edge-line { position: absolute; inset: 0; height: 2px; background: var(--border); }
+.pipeline-edge-particle {
+  position: absolute; top: -2px;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); box-shadow: 0 0 6px var(--accent);
+  animation: flowRight 2s ease-in-out infinite;
+}
+@keyframes flowRight { 0%{left:-6px;opacity:0}15%{opacity:1}85%{opacity:1}100%{left:calc(100% + 6px);opacity:0} }
+.pipeline-edge-particle.reverse { background:var(--orange);box-shadow:0 0 6px var(--orange);animation:flowLeft 2.5s ease-in-out infinite; }
+@keyframes flowLeft { 0%{left:calc(100% + 6px);opacity:0}15%{opacity:1}85%{opacity:1}100%{left:-6px;opacity:0} }
+.pipeline-edge-particle.stale { background:var(--muted);box-shadow:0 0 4px var(--muted);animation:flowRight 4s ease-in-out infinite;opacity:0.4; }
+
+/* Mobile pipeline: vertical */
+.pipeline-mobile-arrow {
+  display: none;
+  color: var(--muted);
+  text-align: center;
+  padding: 4px 0;
+}
+.pipeline-mobile-arrow svg { width: 16px; height: 16px; }
+
+/* ── Pills ── */
+.pill { display:inline-flex;align-items:center;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;gap:4px;white-space:nowrap; }
+.pill-success { color:var(--accent);background:var(--accent-light); }
+.pill-warning { color:var(--orange);background:var(--orange-light); }
+.pill-error { color:var(--status-error);background:var(--red-soft); }
+.pill-info { color:var(--cyan);background:var(--cyan-light); }
+.pill-muted { color:var(--muted);background:rgba(95,99,110,0.15); }
+.pill-purple { color:var(--purple);background:var(--purple-light); }
+
+/* ── Session Cards (mobile-first, table on desktop) ── */
+.session-list { display: flex; flex-direction: column; gap: 8px; }
+.session-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-left: 3px solid transparent;
+  border-radius: 6px;
+  padding: 14px 16px;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+@media (hover: hover) {
+  .session-card:hover { background: var(--surface); border-left-color: var(--accent); }
+}
+.session-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+.session-card-body { font-size: 12px; color: var(--text-secondary); }
+.session-card-meta { display: flex; gap: 12px; margin-top: 6px; font-size: 11px; color: var(--muted); flex-wrap: wrap; }
+.active-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.3} }
+.active-dot.green { background:var(--accent);box-shadow:0 0 6px var(--accent); }
+.active-dot.yellow { background:var(--orange);box-shadow:0 0 6px var(--orange); }
+.active-dot.red { background:var(--status-error);box-shadow:0 0 6px var(--status-error); }
+.pid { font-family:'SF Mono','Fira Code',monospace;font-size:12px;color:var(--cyan); }
+.tty { font-family:'SF Mono','Fira Code',monospace;font-size:11px;color:var(--text-secondary); }
+.branch-tag { font-size: 12px; font-weight: 600; }
+
+/* ── Worktree Grid ── */
+.wt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.wt-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: 6px;
+  padding: 14px 16px;
+  border-left: 3px solid transparent;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+@media (hover: hover) { .wt-card:hover { background: var(--surface); border-left-color: var(--accent); } }
+.wt-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 8px; flex-wrap: wrap; }
+.wt-card-name { font-size: 13px; font-weight: 600; word-break: break-all; }
+.wt-card-commit { font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; }
+.wt-card-base { font-size: 11px; color: var(--muted); }
+.wt-card-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+
+/* ── Summary ── */
+.summary-panel {
+  background: var(--surface);
+  border-radius: 8px;
+  border-left: 2px solid var(--orange);
+  padding: 20px 24px;
+  margin-top: 8px;
+}
+.summary-title { font-size: 14px; font-weight: 600; color: var(--orange); margin-bottom: 12px; }
+.summary-list { list-style: none; }
+.summary-list li {
+  font-size: 13px; color: var(--text-secondary);
+  padding: 6px 0;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.summary-list li::before {
+  content: ''; display: inline-block;
+  width: 4px; height: 4px; border-radius: 1px;
+  background: var(--orange); margin-top: 7px; flex-shrink: 0;
+}
+.summary-list code { color: var(--text-secondary); font-size: 12px; }
+
+.timestamp { font-size: 11px; color: var(--muted); text-align: right; margin-top: 24px; }
+
+/* ── Background grid ── */
+.bg-grid { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.bg-grid::before {
+  content: ''; position: absolute; inset: -50%;
+  background-image: linear-gradient(var(--border-light) 1px, transparent 1px), linear-gradient(90deg, var(--border-light) 1px, transparent 1px);
+  background-size: 60px 60px; opacity: 0.2;
+  animation: gridShift 60s linear infinite;
+}
+@keyframes gridShift { 0%{transform:translate(0,0)}100%{transform:translate(60px,60px)} }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .stat-row { grid-template-columns: repeat(2, 1fr); }
+  .wt-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .page { padding: 16px 12px; }
+  .page-title { font-size: 18px; }
+  .stat-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat-card { padding: 14px 16px; }
+  .stat-value { font-size: 22px; }
+  .stat-meta { font-size: 11px; }
+  .pipeline-container { padding: 16px; }
+  .pipeline { flex-direction: column; gap: 0; align-items: stretch; }
+  .pipeline-node { min-width: unset; }
+  .pipeline-edge { display: none; }
+  .pipeline-mobile-arrow { display: block; }
+  .summary-panel { padding: 16px; }
+  .summary-list li { font-size: 12px; }
+}
+@media (max-width: 400px) {
+  .stat-row { grid-template-columns: 1fr; gap: 8px; }
+  .page-header { gap: 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+
+<div class="page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-header-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M6 9v12"/>
+      </svg>
+    </div>
+    <div>
+      <div class="page-title">aegas_mvp_v3</div>
+      <div class="page-subtitle">Git Worktree &amp; Session Analysis &mdash; paperclip-dev branch</div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="stat-label">Worktrees</div>
+      <div class="stat-value accent">9</div>
+      <div class="stat-meta">8 dirs + 1 broken ref</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Sessions</div>
+      <div class="stat-value orange">8</div>
+      <div class="stat-meta">1 active, 7 stale</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Commits Behind</div>
+      <div class="stat-value purple">130</div>
+      <div class="stat-meta">fba7144 &rarr; HEAD</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Broken</div>
+      <div class="stat-value error">1</div>
+      <div class="stat-meta">cla-94 dir deleted</div>
+    </div>
+  </div>
+
+  <!-- Section: Pipelines -->
+  <div class="collapsible">
+    <button class="collapsible-trigger" aria-expanded="true" onclick="toggleSection(this)">
+      <span class="dot" style="background: var(--accent);"></span>
+      Dataflow Pipelines
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="collapsible-content" data-collapsed="false">
+      <div class="collapsible-body">
+
+        <div class="pipeline-container">
+          <div class="pipeline-label">Branch Flow</div>
+          <div class="pipeline">
+            <div class="pipeline-node active">
+              <div class="pipeline-node-label">Main</div>
+              <div class="pipeline-node-value">origin/main</div>
+            </div>
+            <div class="pipeline-edge"><div class="pipeline-edge-line"></div><div class="pipeline-edge-particle"></div></div>
+            <div class="pipeline-mobile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+            <div class="pipeline-node active">
+              <div class="pipeline-node-label">Development</div>
+              <div class="pipeline-node-value">paperclip-dev</div>
+            </div>
+            <div class="pipeline-edge"><div class="pipeline-edge-line"></div><div class="pipeline-edge-particle" style="animation-delay:.4s"></div></div>
+            <div class="pipeline-mobile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+            <div class="pipeline-node warning">
+              <div class="pipeline-node-label">Fork Point</div>
+              <div class="pipeline-node-value">fba7144</div>
+            </div>
+            <div class="pipeline-edge"><div class="pipeline-edge-line"></div><div class="pipeline-edge-particle stale" style="animation-delay:.8s"></div></div>
+            <div class="pipeline-mobile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+            <div class="pipeline-node info">
+              <div class="pipeline-node-label">8 Worktrees</div>
+              <div class="pipeline-node-value">130 behind</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipeline-container">
+          <div class="pipeline-label">Session &rarr; Worktree Mapping</div>
+          <div class="pipeline">
+            <div class="pipeline-node active">
+              <div class="pipeline-node-label">PID 30148</div>
+              <div class="pipeline-node-value">This Session</div>
+            </div>
+            <div class="pipeline-edge"><div class="pipeline-edge-line"></div><div class="pipeline-edge-particle"></div></div>
+            <div class="pipeline-mobile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+            <div class="pipeline-node active">
+              <div class="pipeline-node-label">Branch</div>
+              <div class="pipeline-node-value">paperclip-dev</div>
+            </div>
+            <div class="pipeline-edge"><div class="pipeline-edge-line"></div><div class="pipeline-edge-particle" style="animation-delay:.3s"></div></div>
+            <div class="pipeline-mobile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+            <div class="pipeline-node purple">
+              <div class="pipeline-node-label">Sub-agent</div>
+              <div class="pipeline-node-value">PID 28328</div>
+            </div>
+            <div class="pipeline-edge"><div class="pipeline-edge-line"></div><div class="pipeline-edge-particle reverse" style="animation-delay:.6s"></div></div>
+            <div class="pipeline-mobile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+            <div class="pipeline-node error">
+              <div class="pipeline-node-label">Broken</div>
+              <div class="pipeline-node-value">cla-94</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipeline-container">
+          <div class="pipeline-label">Proposed Rebase</div>
+          <div class="pipeline">
+            <div class="pipeline-node warning">
+              <div class="pipeline-node-label">Fork Point</div>
+              <div class="pipeline-node-value">fba7144</div>
+            </div>
+            <div class="pipeline-edge"><div class="pipeline-edge-line"></div><div class="pipeline-edge-particle reverse"></div></div>
+            <div class="pipeline-mobile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+            <div class="pipeline-node purple">
+              <div class="pipeline-node-label">+130 commits</div>
+              <div class="pipeline-node-value">rebase</div>
+            </div>
+            <div class="pipeline-edge"><div class="pipeline-edge-line"></div><div class="pipeline-edge-particle" style="animation-delay:.5s"></div></div>
+            <div class="pipeline-mobile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+            <div class="pipeline-node active">
+              <div class="pipeline-node-label">New Base</div>
+              <div class="pipeline-node-value">9414f46</div>
+            </div>
+            <div class="pipeline-edge"><div class="pipeline-edge-line"></div><div class="pipeline-edge-particle" style="animation-delay:1s"></div></div>
+            <div class="pipeline-mobile-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></div>
+            <div class="pipeline-node active">
+              <div class="pipeline-node-label">Target</div>
+              <div class="pipeline-node-value">paperclip-dev</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Section: Sessions -->
+  <div class="collapsible">
+    <button class="collapsible-trigger" aria-expanded="true" onclick="toggleSection(this)">
+      <span class="dot" style="background: var(--orange);"></span>
+      Active Claude Sessions
+      <span class="pill pill-warning" style="margin-left: 4px;">8</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="collapsible-content" data-collapsed="false">
+      <div class="collapsible-body">
+        <div class="session-list">
+
+          <div class="session-card" style="border-left-color: var(--accent);">
+            <div class="session-card-header">
+              <span class="active-dot green"></span>
+              <span class="pill pill-success">Active</span>
+              <span class="pid">PID 30148</span>
+              <span class="branch-tag" style="color: var(--accent);">paperclip-dev</span>
+            </div>
+            <div class="session-card-body">Current interactive session &mdash; main repo</div>
+            <div class="session-card-meta"><span class="tty">ttys008</span><span>Main working directory</span></div>
+          </div>
+
+          <div class="session-card" style="border-left-color: var(--status-error);">
+            <div class="session-card-header">
+              <span class="active-dot red"></span>
+              <span class="pill pill-error">Broken</span>
+              <span class="pid">PID 28328</span>
+              <span class="branch-tag" style="color: var(--status-error);">cla-94-student-result-audit</span>
+            </div>
+            <div class="session-card-body">Paperclip sub-agent (Frontend Dev) &mdash; worktree directory deleted</div>
+            <div class="session-card-meta"><span class="tty">ttys000</span><span>Orphaned process</span></div>
+          </div>
+
+          <div class="session-card" style="border-left-color: var(--orange);">
+            <div class="session-card-header">
+              <span class="active-dot yellow"></span>
+              <span class="pill pill-warning">Stale</span>
+              <span class="pid">PID 13947</span>
+              <span class="branch-tag" style="color: var(--muted);">clawteam/fd1</span>
+            </div>
+            <div class="session-card-body">ClawTeam redesign-team agent &mdash; empty workspace, idle</div>
+            <div class="session-card-meta"><span class="tty">ttys001</span></div>
+          </div>
+
+          <div class="session-card" style="border-left-color: var(--orange);">
+            <div class="session-card-header">
+              <span class="active-dot yellow"></span>
+              <span class="pill pill-warning">Stale</span>
+              <span class="pid">PID 26008</span>
+              <span class="branch-tag" style="color: var(--muted);">clawteam/fd1</span>
+            </div>
+            <div class="session-card-body">ClawTeam redesign-team child process &mdash; shares fd1 workspace</div>
+            <div class="session-card-meta"><span class="tty">ttys007</span></div>
+          </div>
+
+          <div class="session-card" style="border-left-color: var(--orange);">
+            <div class="session-card-header">
+              <span class="active-dot yellow"></span>
+              <span class="pill pill-warning">Stale</span>
+              <span class="pid">PID 14325</span>
+              <span class="branch-tag" style="color: var(--muted);">clawteam/fd2</span>
+            </div>
+            <div class="session-card-body">ClawTeam redesign-team agent &mdash; empty workspace, idle</div>
+            <div class="session-card-meta"><span class="tty">ttys003</span></div>
+          </div>
+
+          <div class="session-card" style="border-left-color: var(--orange);">
+            <div class="session-card-header">
+              <span class="active-dot yellow"></span>
+              <span class="pill pill-warning">Stale</span>
+              <span class="pid">PID 14886</span>
+              <span class="branch-tag" style="color: var(--muted);">clawteam/fd3</span>
+            </div>
+            <div class="session-card-body">ClawTeam redesign-team agent &mdash; empty workspace, idle</div>
+            <div class="session-card-meta"><span class="tty">ttys004</span></div>
+          </div>
+
+          <div class="session-card" style="border-left-color: var(--orange);">
+            <div class="session-card-header">
+              <span class="active-dot yellow"></span>
+              <span class="pill pill-warning">Stale</span>
+              <span class="pid">PID 15448</span>
+              <span class="branch-tag" style="color: var(--muted);">clawteam/fd4</span>
+            </div>
+            <div class="session-card-body">ClawTeam redesign-team agent &mdash; empty workspace, idle</div>
+            <div class="session-card-meta"><span class="tty">ttys005</span></div>
+          </div>
+
+          <div class="session-card" style="border-left-color: var(--orange);">
+            <div class="session-card-header">
+              <span class="active-dot yellow"></span>
+              <span class="pill pill-warning">Stale</span>
+              <span class="pid">PID 16086</span>
+              <span class="branch-tag" style="color: var(--muted);">clawteam/fd5</span>
+            </div>
+            <div class="session-card-body">ClawTeam redesign-team agent &mdash; empty workspace, idle</div>
+            <div class="session-card-meta"><span class="tty">ttys006</span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section: Worktrees -->
+  <div class="collapsible">
+    <button class="collapsible-trigger" aria-expanded="true" onclick="toggleSection(this)">
+      <span class="dot" style="background: var(--purple);"></span>
+      Worktree Branches
+      <span class="pill pill-purple" style="margin-left: 4px;">9</span>
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="collapsible-content" data-collapsed="false">
+      <div class="collapsible-body">
+        <div class="wt-grid">
+
+          <div class="wt-card" style="border-left-color: var(--purple);">
+            <div class="wt-card-header">
+              <span class="wt-card-name" style="color: var(--purple);">agent-a1911ee4</span>
+              <span class="pill pill-purple">Redesign</span>
+            </div>
+            <div class="wt-card-commit">Student appeals pages &mdash; Dark Sequence</div>
+            <div class="wt-card-base">d01d078 &bull; 1 unique commit</div>
+            <div class="wt-card-pills"><span class="pill pill-muted">Clean</span><span class="pill pill-warning">130 behind</span></div>
+          </div>
+
+          <div class="wt-card" style="border-left-color: var(--purple);">
+            <div class="wt-card-header">
+              <span class="wt-card-name" style="color: var(--purple);">agent-a446fb38</span>
+              <span class="pill pill-purple">Redesign</span>
+            </div>
+            <div class="wt-card-commit">Online exam + help pages &mdash; Dark Sequence</div>
+            <div class="wt-card-base">e20860c &bull; 1 unique commit</div>
+            <div class="wt-card-pills"><span class="pill pill-muted">Clean</span><span class="pill pill-warning">130 behind</span></div>
+          </div>
+
+          <div class="wt-card" style="border-left-color: var(--purple);">
+            <div class="wt-card-header">
+              <span class="wt-card-name" style="color: var(--purple);">agent-aa08e69b</span>
+              <span class="pill pill-purple">Redesign</span>
+            </div>
+            <div class="wt-card-commit">Billing pages &mdash; Dark Sequence</div>
+            <div class="wt-card-base">2baa87b &bull; 1 unique commit</div>
+            <div class="wt-card-pills"><span class="pill pill-muted">Clean</span><span class="pill pill-warning">130 behind</span></div>
+          </div>
+
+          <div class="wt-card" style="border-left-color: var(--purple);">
+            <div class="wt-card-header">
+              <span class="wt-card-name" style="color: var(--purple);">agent-aaa0710e</span>
+              <span class="pill pill-purple">Redesign</span>
+            </div>
+            <div class="wt-card-commit">Settings account page &mdash; Dark Sequence</div>
+            <div class="wt-card-base">4240ad4 &bull; 1 unique commit</div>
+            <div class="wt-card-pills"><span class="pill pill-muted">Clean</span><span class="pill pill-warning">130 behind</span></div>
+          </div>
+
+          <div class="wt-card" style="border-left-color: var(--purple);">
+            <div class="wt-card-header">
+              <span class="wt-card-name" style="color: var(--purple);">agent-af66e0cd</span>
+              <span class="pill pill-purple">Redesign</span>
+            </div>
+            <div class="wt-card-commit">API keys page &mdash; Dark Sequence</div>
+            <div class="wt-card-base">90fcdb1 &bull; 1 unique commit</div>
+            <div class="wt-card-pills"><span class="pill pill-muted">Clean</span><span class="pill pill-warning">130 behind</span></div>
+          </div>
+
+          <div class="wt-card" style="border-left-color: var(--cyan);">
+            <div class="wt-card-header">
+              <span class="wt-card-name" style="color: var(--cyan);">cla-37-help-center</span>
+              <span class="pill pill-info">Feature</span>
+            </div>
+            <div class="wt-card-commit">Help center page (Task 9.1)</div>
+            <div class="wt-card-base">72238be &bull; 2 unique commits</div>
+            <div class="wt-card-pills"><span class="pill pill-muted">Clean</span><span class="pill pill-warning">130 behind</span></div>
+          </div>
+
+          <div class="wt-card" style="border-left-color: var(--accent);">
+            <div class="wt-card-header">
+              <span class="wt-card-name" style="color: var(--accent);">cla-75-status-badges</span>
+              <span class="pill pill-success">Fix</span>
+            </div>
+            <div class="wt-card-commit">StatusBadge + CertaintyBadge component</div>
+            <div class="wt-card-base">2bfea9b &bull; 1 unique commit</div>
+            <div class="wt-card-pills"><span class="pill pill-muted">Clean</span><span class="pill pill-warning">130 behind</span></div>
+          </div>
+
+          <div class="wt-card" style="border-left-color: var(--accent);">
+            <div class="wt-card-header">
+              <span class="wt-card-name" style="color: var(--accent);">cla-93-student-perf</span>
+              <span class="pill pill-success">Feature</span>
+            </div>
+            <div class="wt-card-commit">Student Performance table, filters, Edit Grades modal</div>
+            <div class="wt-card-base">65b8545 &bull; 1 unique commit</div>
+            <div class="wt-card-pills"><span class="pill pill-info">9 untracked</span><span class="pill pill-success">Up to date</span></div>
+          </div>
+
+          <div class="wt-card" style="border-left-color: var(--status-error);">
+            <div class="wt-card-header">
+              <span class="wt-card-name" style="color: var(--status-error);">cla-94-student-result</span>
+              <span class="pill pill-error">Broken</span>
+            </div>
+            <div class="wt-card-commit">Student result audit &mdash; directory deleted</div>
+            <div class="wt-card-base">fba7144 &bull; 0 unique commits</div>
+            <div class="wt-card-pills"><span class="pill pill-error">Dir missing</span><span class="pill pill-error">Orphaned ref</span></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section: Actions -->
+  <div class="collapsible">
+    <button class="collapsible-trigger" aria-expanded="true" onclick="toggleSection(this)">
+      <span class="dot" style="background: var(--orange);"></span>
+      Recommended Actions
+      <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="collapsible-content" data-collapsed="false">
+      <div class="collapsible-body">
+        <div class="summary-panel">
+          <div class="summary-title">Cleanup &amp; Rebase Plan</div>
+          <ul class="summary-list">
+            <li>Kill 6 stale ClawTeam sessions (PIDs 13947, 26008, 14325, 14886, 15448, 16086) &mdash; empty workspaces</li>
+            <li>Kill broken sub-agent (PID 28328) &mdash; cla-94 worktree directory deleted</li>
+            <li>Prune orphaned git ref: <code>git worktree prune</code> for cla-94-student-result-audit</li>
+            <li>Rebase 7 worktree branches onto <code style="color: var(--accent);">paperclip-dev</code> (cla-93 already at HEAD)</li>
+            <li>cla-93 has 9 untracked screenshots &mdash; commit or discard before merge</li>
+            <li>Consider deleting cla-94 branch &mdash; 0 unique commits, no value to preserve</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="timestamp">Generated 2026-04-10 &bull; aegas_mvp_v3 &bull; paperclip-dev @ 9414f46</div>
+
+</div>
+
+<script>
+function toggleSection(trigger) {
+  const expanded = trigger.getAttribute('aria-expanded') === 'true';
+  trigger.setAttribute('aria-expanded', String(!expanded));
+  const content = trigger.nextElementSibling;
+  content.setAttribute('data-collapsed', String(expanded));
+}
+</script>
+
+</body>
+</html>
