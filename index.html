@@ -156,12 +156,47 @@ body{font-family:'Inter','Helvetica Neue',-apple-system,sans-serif;background:va
 
 <!-- ════════ KEY INSIGHTS ════════ -->
 <div class="stats" style="gap:20px">
-  <div class="st"><b style="color:var(--ac)">254</b><span>total commits</span></div>
-  <div class="st"><b style="color:var(--pp)">16</b><span>branches</span></div>
-  <div class="st"><b style="color:var(--cy)">402</b><span>files changed</span></div>
-  <div class="st"><b style="color:var(--ac)">42.5k</b><span>lines added</span></div>
-  <div class="st"><b style="color:var(--or)">7.3k</b><span>lines removed</span></div>
+  <div class="st"><b style="color:var(--ac)">256</b><span>total commits</span></div>
+  <div class="st"><b style="color:var(--pp)">11</b><span>branches</span></div>
+  <div class="st"><b style="color:var(--cy)">679</b><span>files changed</span></div>
+  <div class="st"><b style="color:var(--ac)">115.6k</b><span>lines added</span></div>
+  <div class="st"><b style="color:var(--or)">27.7k</b><span>lines removed</span></div>
   <div class="st"><b style="color:var(--rd)">7</b><span>days</span></div>
+</div>
+
+<!-- ════════ COMMITS BY BRANCH ════════ -->
+<div class="sec" style="background:var(--sf);border:1px solid var(--pp);border-radius:8px;padding:0 18px 18px;position:relative;overflow:hidden">
+  <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:600px;height:180px;background:radial-gradient(ellipse,rgba(168,85,247,.08),transparent 70%);pointer-events:none"></div>
+  <button class="sb" aria-expanded="true" onclick="t(this)" style="position:relative">
+    <span class="d" style="background:var(--pp);box-shadow:0 0 8px var(--pp)"></span>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pp)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+    <span style="color:var(--pp);font-size:15px;font-weight:700;letter-spacing:.03em">Commits by Branch</span>
+    <span style="font-size:11px;color:var(--mt);font-weight:400;margin-left:4px">256 total across 5 active branches</span>
+    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="sc" data-o="1"><div class="si" style="position:relative">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;background:var(--bg2);border-radius:6px;overflow:hidden;border:1px solid var(--bdl)">
+      <thead><tr style="color:var(--pp);text-align:left;border-bottom:1px solid var(--bd);background:rgba(168,85,247,.04)">
+        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em">BRANCH</th>
+        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em">COMMITS</th>
+        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em">LATEST COMMIT</th>
+        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em;width:30%">SHARE</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--bdl);background:rgba(168,85,247,.03)"><td style="padding:8px 12px;color:var(--pp);font-weight:600">paperclip-dev</td><td style="padding:8px 12px;color:var(--pp);font-weight:800;font-size:14px">237</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">c9e7809</code> working hours analytics</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:92%;height:100%;background:linear-gradient(90deg,var(--pp),rgba(168,85,247,.6));border-radius:4px;box-shadow:0 0 6px rgba(168,85,247,.4)"></div></div></td></tr>
+        <tr style="border-bottom:1px solid var(--bdl)"><td style="padding:8px 12px;color:var(--cy);font-weight:600">dev</td><td style="padding:8px 12px;color:var(--cy);font-weight:700;font-size:13px">158</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">8a07e28</code> landing page + dashboard route</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:61%;height:100%;background:linear-gradient(90deg,var(--cy),rgba(93,212,245,.6));border-radius:4px"></div></div></td></tr>
+        <tr style="border-bottom:1px solid var(--bdl);background:rgba(168,85,247,.02)"><td style="padding:8px 12px;color:var(--pk);font-weight:600">visual-enhancements</td><td style="padding:8px 12px;color:var(--pk);font-weight:700;font-size:13px">134</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">cb9c449</code> dashboard chart screenshots</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:52%;height:100%;background:linear-gradient(90deg,var(--pk),rgba(244,114,182,.6));border-radius:4px"></div></div></td></tr>
+        <tr style="border-bottom:1px solid var(--bdl)"><td style="padding:8px 12px;color:var(--ac);font-weight:600">main</td><td style="padding:8px 12px;color:var(--ac);font-weight:700;font-size:13px">97</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">fba7144</code> docs: Paperclip restructure</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:38%;height:100%;background:linear-gradient(90deg,var(--ac),rgba(46,196,160,.6));border-radius:4px"></div></div></td></tr>
+        <tr><td style="padding:8px 12px;color:var(--mt);font-weight:600">origin/dev</td><td style="padding:8px 12px;color:var(--mt);font-weight:700;font-size:13px">180</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)">remote &mdash; 22 ahead of local dev</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:70%;height:100%;background:linear-gradient(90deg,var(--mt),rgba(127,127,143,.4));border-radius:4px"></div></div></td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:10px;color:var(--mt);display:flex;gap:16px;flex-wrap:wrap">
+      <span><b style="color:var(--or)">2</b> commits ahead of origin/paperclip-dev</span>
+      <span><b style="color:var(--cy)">22</b> commits origin/dev ahead of local dev</span>
+      <span><b style="color:var(--ac)">4</b> contributors total</span>
+      <span><b style="color:var(--pp)">495</b> tracked files</span>
+    </div>
+  </div></div>
 </div>
 
 <!-- ════════ WORKING HOURS ════════ -->
@@ -641,7 +676,7 @@ body{font-family:'Inter','Helvetica Neue',-apple-system,sans-serif;background:va
         <circle cx="1140" cy="120" r="3" fill="#FBBF24"/><circle cx="1160" cy="120" r="3" fill="#FBBF24"/>
         <circle cx="1180" cy="120" r="3" fill="#FBBF24"/><circle cx="1200" cy="120" r="3" fill="#FBBF24"/>
         <rect x="1118" y="96" width="104" height="14" rx="3" fill="rgba(251,191,36,.1)"/>
-        <text x="1170" y="106" text-anchor="middle" fill="#FBBF24" font-size="7" font-weight="600">17 unpushed commits</text>
+        <text x="1170" y="106" text-anchor="middle" fill="#FBBF24" font-size="7" font-weight="600">2 unpushed commits</text>
 
         <!-- HEAD -->
         <circle cx="1280" cy="120" r="8" fill="none" stroke="#2EC4A0" stroke-width="2.5"/>
@@ -772,13 +807,13 @@ body{font-family:'Inter','Helvetica Neue',-apple-system,sans-serif;background:va
 <div class="sec">
   <button class="sb" aria-expanded="true" onclick="t(this)">
     <span class="d" style="background:var(--ac)"></span>paperclip-dev Timeline
-    <span class="p po" style="margin-left:4px">17 unpushed</span>
+    <span class="p po" style="margin-left:4px">2 unpushed</span>
     <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
   </button>
   <div class="sc" data-o="1"><div class="si">
 
     <div style="margin-bottom:10px;padding:6px 10px;background:rgba(245,158,11,.05);border-radius:5px;border-left:3px solid var(--or)">
-      <span style="font-size:10px;color:var(--or);font-weight:600">UNPUSHED — 17 commits ahead of origin/paperclip-dev</span>
+      <span style="font-size:10px;color:var(--or);font-weight:600">UNPUSHED — 2 commits ahead of origin/paperclip-dev</span>
     </div>
 
     <div class="tl">
@@ -880,7 +915,7 @@ body{font-family:'Inter','Helvetica Neue',-apple-system,sans-serif;background:va
     <div class="sum">
       <h3>Immediate</h3>
       <ul>
-        <li><code style="color:var(--ac)">git push origin paperclip-dev</code> — 17 commits ahead</li>
+        <li><code style="color:var(--ac)">git push origin paperclip-dev</code> — 2 commits ahead</li>
         <li>Kill 6 stale ClawTeam PIDs (13947, 26008, 14325, 14886, 15448, 16086)</li>
         <li>Kill PID 28328 + <code>git worktree prune</code></li>
         <li>Delete <code style="color:var(--rd)">cla-94</code> branch — 0 commits, orphaned</li>
@@ -898,7 +933,7 @@ body{font-family:'Inter','Helvetica Neue',-apple-system,sans-serif;background:va
   </div></div>
 </div>
 
-<div class="ts">Generated 2026-04-10 &bull; aegas_mvp_v3 &bull; paperclip-dev @ a5f1cce &bull; 137 commits / 14 branches</div>
+<div class="ts">Generated 2026-04-10 &bull; aegas_mvp_v3 &bull; paperclip-dev @ c9e7809 &bull; 256 commits / 11 branches</div>
 
 </div>
 <script>function t(b){const e=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',String(!e));b.nextElementSibling.setAttribute('data-o',e?'0':'1')}</script>
