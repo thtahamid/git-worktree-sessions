@@ -164,41 +164,6 @@ body{font-family:'Inter','Helvetica Neue',-apple-system,sans-serif;background:va
   <div class="st"><b style="color:var(--rd)">7</b><span>days</span></div>
 </div>
 
-<!-- ════════ COMMITS BY BRANCH ════════ -->
-<div class="sec" style="background:var(--sf);border:1px solid var(--pp);border-radius:8px;padding:0 18px 18px;position:relative;overflow:hidden">
-  <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:600px;height:180px;background:radial-gradient(ellipse,rgba(168,85,247,.08),transparent 70%);pointer-events:none"></div>
-  <button class="sb" aria-expanded="true" onclick="t(this)" style="position:relative">
-    <span class="d" style="background:var(--pp);box-shadow:0 0 8px var(--pp)"></span>
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pp)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
-    <span style="color:var(--pp);font-size:15px;font-weight:700;letter-spacing:.03em">Commits by Branch</span>
-    <span style="font-size:11px;color:var(--mt);font-weight:400;margin-left:4px">256 total across 5 active branches</span>
-    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-  </button>
-  <div class="sc" data-o="1"><div class="si" style="position:relative">
-    <table style="width:100%;border-collapse:collapse;font-size:12px;background:var(--bg2);border-radius:6px;overflow:hidden;border:1px solid var(--bdl)">
-      <thead><tr style="color:var(--pp);text-align:left;border-bottom:1px solid var(--bd);background:rgba(168,85,247,.04)">
-        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em">BRANCH</th>
-        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em">COMMITS</th>
-        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em">LATEST COMMIT</th>
-        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em;width:30%">SHARE</th>
-      </tr></thead>
-      <tbody>
-        <tr style="border-bottom:1px solid var(--bdl);background:rgba(168,85,247,.03)"><td style="padding:8px 12px;color:var(--pp);font-weight:600">paperclip-dev</td><td style="padding:8px 12px;color:var(--pp);font-weight:800;font-size:14px">237</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">c9e7809</code> working hours analytics</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:92%;height:100%;background:linear-gradient(90deg,var(--pp),rgba(168,85,247,.6));border-radius:4px;box-shadow:0 0 6px rgba(168,85,247,.4)"></div></div></td></tr>
-        <tr style="border-bottom:1px solid var(--bdl)"><td style="padding:8px 12px;color:var(--cy);font-weight:600">dev</td><td style="padding:8px 12px;color:var(--cy);font-weight:700;font-size:13px">158</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">8a07e28</code> landing page + dashboard route</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:61%;height:100%;background:linear-gradient(90deg,var(--cy),rgba(93,212,245,.6));border-radius:4px"></div></div></td></tr>
-        <tr style="border-bottom:1px solid var(--bdl);background:rgba(168,85,247,.02)"><td style="padding:8px 12px;color:var(--pk);font-weight:600">visual-enhancements</td><td style="padding:8px 12px;color:var(--pk);font-weight:700;font-size:13px">134</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">cb9c449</code> dashboard chart screenshots</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:52%;height:100%;background:linear-gradient(90deg,var(--pk),rgba(244,114,182,.6));border-radius:4px"></div></div></td></tr>
-        <tr style="border-bottom:1px solid var(--bdl)"><td style="padding:8px 12px;color:var(--ac);font-weight:600">main</td><td style="padding:8px 12px;color:var(--ac);font-weight:700;font-size:13px">97</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">fba7144</code> docs: Paperclip restructure</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:38%;height:100%;background:linear-gradient(90deg,var(--ac),rgba(46,196,160,.6));border-radius:4px"></div></div></td></tr>
-        <tr><td style="padding:8px 12px;color:var(--mt);font-weight:600">origin/dev</td><td style="padding:8px 12px;color:var(--mt);font-weight:700;font-size:13px">180</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)">remote &mdash; 22 ahead of local dev</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:70%;height:100%;background:linear-gradient(90deg,var(--mt),rgba(127,127,143,.4));border-radius:4px"></div></div></td></tr>
-      </tbody>
-    </table>
-    <div style="margin-top:10px;font-size:10px;color:var(--mt);display:flex;gap:16px;flex-wrap:wrap">
-      <span><b style="color:var(--or)">2</b> commits ahead of origin/paperclip-dev</span>
-      <span><b style="color:var(--cy)">22</b> commits origin/dev ahead of local dev</span>
-      <span><b style="color:var(--ac)">4</b> contributors total</span>
-      <span><b style="color:var(--pp)">495</b> tracked files</span>
-    </div>
-  </div></div>
-</div>
-
 <!-- ════════ WORKING HOURS ════════ -->
 <div class="sec" style="background:var(--sf);border:1px solid var(--or);border-radius:8px;padding:0 18px 18px;position:relative;overflow:hidden">
   <!-- Ambient glow -->
@@ -266,8 +231,87 @@ body{font-family:'Inter','Helvetica Neue',-apple-system,sans-serif;background:va
       <span class="p pc" style="font-family:'SF Mono',monospace;font-size:10px">ccstatusline 2.5h</span>
     </div>
 
+    <!-- API Cost Breakdown -->
+    <div style="margin-top:16px;padding:14px 16px;background:var(--bg2);border:1px solid rgba(245,158,11,.2);border-radius:6px">
+      <div style="font-size:12px;font-weight:700;color:var(--or);margin-bottom:10px;letter-spacing:.04em">ESTIMATED API COST</div>
+
+      <!-- Token totals -->
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px">
+        <div><span style="font-size:10px;color:var(--mt)">Input</span><div style="font-size:13px;font-weight:600;color:var(--tx2)">0.24M</div></div>
+        <div><span style="font-size:10px;color:var(--mt)">Cache write</span><div style="font-size:13px;font-weight:600;color:var(--tx2)">41.16M</div></div>
+        <div><span style="font-size:10px;color:var(--mt)">Cache read</span><div style="font-size:13px;font-weight:600;color:var(--pp)">1,289.88M</div></div>
+        <div><span style="font-size:10px;color:var(--mt)">Output</span><div style="font-size:13px;font-weight:600;color:var(--tx2)">6.46M</div></div>
+      </div>
+
+      <!-- Model cost comparison -->
+      <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:12px;border:1px solid var(--bdl);border-radius:4px;overflow:hidden">
+        <thead><tr style="color:var(--or);text-align:left;border-bottom:1px solid var(--bd);background:rgba(245,158,11,.04)">
+          <th style="padding:6px 10px;font-weight:600;font-size:10px;letter-spacing:.04em"></th>
+          <th style="padding:6px 10px;font-weight:600;font-size:10px;letter-spacing:.04em;color:var(--pk)">OPUS 4</th>
+          <th style="padding:6px 10px;font-weight:600;font-size:10px;letter-spacing:.04em;color:var(--pp)">SONNET 4</th>
+          <th style="padding:6px 10px;font-weight:600;font-size:10px;letter-spacing:.04em;color:var(--cy)">HAIKU 3.5</th>
+        </tr></thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--bdl)"><td style="padding:5px 10px;color:var(--mt)">Input</td><td style="padding:5px 10px;color:var(--tx2)">$3.61</td><td style="padding:5px 10px;color:var(--tx2)">$0.72</td><td style="padding:5px 10px;color:var(--tx2)">$0.19</td></tr>
+          <tr style="border-bottom:1px solid var(--bdl);background:rgba(245,158,11,.02)"><td style="padding:5px 10px;color:var(--mt)">Cache write</td><td style="padding:5px 10px;color:var(--tx2)">$771.75</td><td style="padding:5px 10px;color:var(--tx2)">$154.35</td><td style="padding:5px 10px;color:var(--tx2)">$41.16</td></tr>
+          <tr style="border-bottom:1px solid var(--bdl)"><td style="padding:5px 10px;color:var(--mt)">Cache read</td><td style="padding:5px 10px;color:var(--pp)">$2,418.53</td><td style="padding:5px 10px;color:var(--pp)">$483.71</td><td style="padding:5px 10px;color:var(--tx2)">$103.19</td></tr>
+          <tr style="border-bottom:1px solid var(--bdl);background:rgba(245,158,11,.02)"><td style="padding:5px 10px;color:var(--mt)">Output</td><td style="padding:5px 10px;color:var(--tx2)">$484.66</td><td style="padding:5px 10px;color:var(--tx2)">$96.93</td><td style="padding:5px 10px;color:var(--tx2)">$25.85</td></tr>
+          <tr style="border-top:1px solid var(--bd);background:rgba(245,158,11,.04)"><td style="padding:6px 10px;color:var(--or);font-weight:700">Total</td><td style="padding:6px 10px;color:var(--pk);font-weight:700;font-size:13px">$3,678</td><td style="padding:6px 10px;color:var(--pp);font-weight:700;font-size:13px">$736</td><td style="padding:6px 10px;color:var(--cy);font-weight:700;font-size:13px">$170</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Realistic estimate -->
+      <div style="padding:10px 12px;background:rgba(46,196,160,.05);border:1px solid rgba(46,196,160,.15);border-radius:4px;border-left:3px solid var(--ac)">
+        <div style="font-size:11px;font-weight:700;color:var(--ac);margin-bottom:6px">MOST LIKELY COST (mixed usage)</div>
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:6px">
+          <span style="font-size:32px;font-weight:800;color:var(--ac);line-height:1;letter-spacing:-.02em;text-shadow:0 0 20px rgba(46,196,160,.2)">~$630</span>
+          <span style="font-size:11px;color:var(--mt)">estimated real cost</span>
+        </div>
+        <div style="font-size:10px;color:var(--tx2);line-height:1.5">
+          <div>Sonnet for main sessions (~1.086B tokens) &mdash; <b style="color:var(--pp)">$597</b></div>
+          <div>Haiku for 181 subagents (~252M tokens) &mdash; <b style="color:var(--cy)">$33</b></div>
+          <div style="color:var(--mt);margin-top:4px">Dominant cost: cache reads (96% of tokens) &mdash; $484 at Sonnet rates alone</div>
+        </div>
+      </div>
+    </div>
+
     <div style="margin-top:12px;font-size:10px;color:var(--mt);font-style:italic;padding:6px 10px;background:rgba(245,158,11,.04);border-radius:4px;border-left:2px solid rgba(245,158,11,.3)">Apr 7&ndash;9 show 24h/day due to autonomous Paperclip multi-agent sessions running continuously. Wall-clock time merges overlapping concurrent sessions.</div>
 
+  </div></div>
+</div>
+
+<!-- ════════ COMMITS BY BRANCH ════════ -->
+<div class="sec" style="background:var(--sf);border:1px solid var(--pp);border-radius:8px;padding:0 18px 18px;position:relative;overflow:hidden">
+  <div style="position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:600px;height:180px;background:radial-gradient(ellipse,rgba(168,85,247,.08),transparent 70%);pointer-events:none"></div>
+  <button class="sb" aria-expanded="true" onclick="t(this)" style="position:relative">
+    <span class="d" style="background:var(--pp);box-shadow:0 0 8px var(--pp)"></span>
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--pp)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><line x1="6" y1="3" x2="6" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+    <span style="color:var(--pp);font-size:15px;font-weight:700;letter-spacing:.03em">Commits by Branch</span>
+    <span style="font-size:11px;color:var(--mt);font-weight:400;margin-left:4px">256 total across 5 active branches</span>
+    <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div class="sc" data-o="1"><div class="si" style="position:relative">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;background:var(--bg2);border-radius:6px;overflow:hidden;border:1px solid var(--bdl)">
+      <thead><tr style="color:var(--pp);text-align:left;border-bottom:1px solid var(--bd);background:rgba(168,85,247,.04)">
+        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em">BRANCH</th>
+        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em">COMMITS</th>
+        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em">LATEST COMMIT</th>
+        <th style="padding:8px 12px;font-weight:600;font-size:11px;letter-spacing:.04em;width:30%">SHARE</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--bdl);background:rgba(168,85,247,.03)"><td style="padding:8px 12px;color:var(--pp);font-weight:600">paperclip-dev</td><td style="padding:8px 12px;color:var(--pp);font-weight:800;font-size:14px">237</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">c9e7809</code> working hours analytics</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:92%;height:100%;background:linear-gradient(90deg,var(--pp),rgba(168,85,247,.6));border-radius:4px;box-shadow:0 0 6px rgba(168,85,247,.4)"></div></div></td></tr>
+        <tr style="border-bottom:1px solid var(--bdl)"><td style="padding:8px 12px;color:var(--cy);font-weight:600">dev</td><td style="padding:8px 12px;color:var(--cy);font-weight:700;font-size:13px">158</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">8a07e28</code> landing page + dashboard route</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:61%;height:100%;background:linear-gradient(90deg,var(--cy),rgba(93,212,245,.6));border-radius:4px"></div></div></td></tr>
+        <tr style="border-bottom:1px solid var(--bdl);background:rgba(168,85,247,.02)"><td style="padding:8px 12px;color:var(--pk);font-weight:600">visual-enhancements</td><td style="padding:8px 12px;color:var(--pk);font-weight:700;font-size:13px">134</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">cb9c449</code> dashboard chart screenshots</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:52%;height:100%;background:linear-gradient(90deg,var(--pk),rgba(244,114,182,.6));border-radius:4px"></div></div></td></tr>
+        <tr style="border-bottom:1px solid var(--bdl)"><td style="padding:8px 12px;color:var(--ac);font-weight:600">main</td><td style="padding:8px 12px;color:var(--ac);font-weight:700;font-size:13px">97</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)"><code style="color:var(--ac)">fba7144</code> docs: Paperclip restructure</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:38%;height:100%;background:linear-gradient(90deg,var(--ac),rgba(46,196,160,.6));border-radius:4px"></div></div></td></tr>
+        <tr><td style="padding:8px 12px;color:var(--mt);font-weight:600">origin/dev</td><td style="padding:8px 12px;color:var(--mt);font-weight:700;font-size:13px">180</td><td style="padding:8px 12px;font-size:10px;color:var(--mt)">remote &mdash; 22 ahead of local dev</td><td style="padding:8px 12px"><div style="height:8px;border-radius:4px;background:var(--bdl);overflow:hidden"><div style="width:70%;height:100%;background:linear-gradient(90deg,var(--mt),rgba(127,127,143,.4));border-radius:4px"></div></div></td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:10px;font-size:10px;color:var(--mt);display:flex;gap:16px;flex-wrap:wrap">
+      <span><b style="color:var(--or)">2</b> commits ahead of origin/paperclip-dev</span>
+      <span><b style="color:var(--cy)">22</b> commits origin/dev ahead of local dev</span>
+      <span><b style="color:var(--ac)">4</b> contributors total</span>
+      <span><b style="color:var(--pp)">495</b> tracked files</span>
+    </div>
   </div></div>
 </div>
 
